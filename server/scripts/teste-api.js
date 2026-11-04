@@ -13,7 +13,8 @@ const PORTA = 3877;
 const BASE = `http://localhost:${PORTA}/api`;
 const ADMIN = { email: 'admin@teste.local', password: 'senha-de-teste-123' };
 
-const servidor = spawn(process.execPath, ['server/index.js'], {
+// Inicia pelo server.js com require(), como a Hostinger (LiteSpeed) faz.
+const servidor = spawn(process.execPath, ['-e', "require('./server.js')"], {
   cwd: raiz,
   env: {
     ...process.env,
