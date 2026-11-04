@@ -19,11 +19,12 @@ export default function FiltrosConsulta({ emitentes, cnpj, onCnpj, busca, onBusc
     <div className="painel p-4 sm:p-5">
       <div className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto]">
         <Campo label="CNPJ emissor">
-          <Select value={cnpj || undefined} onValueChange={onCnpj} disabled={!emitentes.length}>
+          <Select value={cnpj || 'todos'} onValueChange={(v) => onCnpj(v === 'todos' ? '' : v)}>
             <SelectTrigger className="h-10 rounded-lg border-border bg-background text-sm">
-              <SelectValue placeholder="Selecione o CNPJ" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="todos">Todos os CNPJs</SelectItem>
               {emitentes.map((e) => (
                 <SelectItem key={e.id} value={e.cnpj}>
                   {nomeEmitente(e)} · {formatCnpj(e.cnpj)}

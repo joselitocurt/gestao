@@ -10,7 +10,7 @@ const Valor = ({ label, valor }) => (
   </div>
 );
 
-export default function NotaConsultaCard({ nota }) {
+export default function NotaConsultaCard({ nota, emissor }) {
   const total = totalGuia(nota);
   const pago = nota.status === 'pago' ? total : 0;
 
@@ -22,6 +22,7 @@ export default function NotaConsultaCard({ nota }) {
             NF {nota.numero || '—'}
             <span className="ml-1.5 text-xs font-normal text-muted-foreground">série {nota.serie || '—'}</span>
           </p>
+          {emissor ? <p className="mt-0.5 text-xs font-semibold text-accent-foreground">Emitida por {emissor}</p> : null}
           <p className="mt-0.5 truncate text-[13px]">{nota.destinatario_nome || '—'}</p>
           <p className="numeros text-xs text-muted-foreground">
             {formatCpf(nota.destinatario_cpf) || 'sem CPF'}

@@ -4,13 +4,14 @@ import { FileSearch } from 'lucide-react';
 import { api } from '@/api/client';
 import FiltrosConsulta from '@/components/consulta/FiltrosConsulta';
 import NotaConsultaCard from '@/components/consulta/NotaConsultaCard';
-import { ordenarEmitentes } from '@/lib/fiscal';
+import { nomeEmitente, ordenarEmitentes } from '@/lib/fiscal';
 
 export default function Consulta() {
   const [emitentes, setEmitentes] = useState([]);
   const [cnpj, setCnpj] = useState('');
   const [busca, setBusca] = useState('');
-  const [nota, setNota] = useState(null);
+  const [notas, setNotas] = useState([]);
+  const [exata, setExata] = useState(true);
   const [buscou, setBuscou] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
@@ -18,26 +19,27 @@ export default function Consulta() {
     api.entities.Emitente.list().then((itens) => {
       const ordenados = ordenarEmitentes(itens);
       setEmitentes(ordenados);
-      setCnpj((atual) => atual || ordenados[0]?.cnpj || '');
     });
   }, []);
 
   const consultar = useCallback(async () => {
     const termo = busca.trim();
-    if (!cnpj || !termo) {
-      setNota(null);
+    if (!termo) {
+      setNotas([]);
       setBuscou(false);
       return;
     }
     setCarregando(true);
     try {
-      const pagina = await api.entities.NotaFiscal.filter(
-        { emitente_cnpj: cnpj, numero: { $regex: termo } },
-        { sort: '-data_emissao', limit: 20 },
-      );
+      // Com "Todos os CNPJs", procura o número em todos os emissores.
+      const filtro = { numero: { $regex: termo } };
+      if (cnpj) filtro.emitente_cnpj = cnpj;
+      const pagina = await api.entities.NotaFiscal.filter(filtro, { sort: '-data_emissao', limit: 50 });
       const encontradas = pagina.items || [];
-      const exata = encontradas.find((n) => String(n.numero) === termo);
-      setNota(exata || encontradas[0] || null);
+      const exatas = encontradas.filter((n) => String(n.numero) === termo);
+      // Número exato (pode existir em mais de um CNPJ); sem exato, as notas que contêm o número.
+      setNotas(exatas.length ? exatas : encontradas.slice(0, 20));
+      setExata(exatas.length > 0 || !encontradas.length);
       setBuscou(true);
     } finally {
       setCarregando(false);
@@ -45,17 +47,16 @@ export default function Consulta() {
   }, [cnpj, busca]);
 
   const limpar = () => {
-    setNota(null);
+    setNotas([]);
     setBuscou(false);
   };
 
-  const emitenteAtual = emitentes.find((e) => e.cnpj === cnpj);
 
   return (
     <div>
       <PageHeader
         titulo="Consultar nota"
-        descricao="Encontre uma nota pelo CNPJ emissor e pelo número para conferir valores, pagamento e comprovante."
+        descricao="Encontre uma nota pelo número, em todos os CNPJs ou num CNPJ emissor, para conferir valores, pagamento e comprovante."
       />
 
       <div className="mt-6">
@@ -77,9 +78,24 @@ export default function Consulta() {
 
       {carregando ? (
         <div className="mt-5 h-32 animate-pulse rounded-xl border border-border bg-muted/50" />
-      ) : !buscou ? null : nota ? (
-        <div className="mt-5">
-          <NotaConsultaCard nota={nota} />
+      ) : !buscou ? null : notas.length ? (
+        <div className="mt-5 space-y-3">
+          {!exata ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhuma nota com o número exato {busca.trim()}. Notas que contêm esse número:
+            </p>
+          ) : notas.length > 1 ? (
+            <p className="text-sm text-muted-foreground">
+              {notas.length} notas com o número {busca.trim()} em CNPJs diferentes.
+            </p>
+          ) : null}
+          {notas.map((n) => (
+            <NotaConsultaCard
+              key={n.id}
+              nota={n}
+              emissor={cnpj ? null : nomeEmitente(emitentes.find((e) => e.cnpj === n.emitente_cnpj) || { cnpj: n.emitente_cnpj })}
+            />
+          ))}
         </div>
       ) : (
         <div className="mt-5 flex flex-col items-center painel px-6 py-16 text-center">
@@ -88,7 +104,7 @@ export default function Consulta() {
           </span>
           <p className="mt-4 font-display text-lg">Nota não disponível em sistema</p>
           <p className="mt-1 max-w-xs text-[13px] leading-relaxed text-muted-foreground">
-            Confira o CNPJ emissor e o número da nota pesquisados.
+            Confira o número da nota e o CNPJ emissor pesquisados.
           </p>
         </div>
       )}
