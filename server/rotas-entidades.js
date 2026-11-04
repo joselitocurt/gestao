@@ -25,7 +25,7 @@ const negar = (mensagem = 'Sem permissão para esta operação') => {
 
 // Páginas que permitem gravar cada entidade (mesmas telas que gravam no app original).
 const ESCRITA = {
-  NotaFiscal: ['apuracao', 'cadastrar_nota', 'importar_xml'],
+  NotaFiscal: ['apuracao', 'cadastrar_nota', 'importar_xml', 'emissao_lote'],
   Emitente: ['cnpjs', 'importar_xml'],
 };
 
@@ -172,21 +172,16 @@ rotasEntidades.post('/:entidade/bulk', (req, res) => {
   res.status(201).json(criados);
 });
 
-rotasEntidades.put('/:entidade/:id', (req, res) => {
-  const def = obterDef(req.params.entidade);
-  verificarAcesso(req, req.params.entidade, 'escrita');
-  const dados = prepararDados(def, req.body, { parcial: true });
-  if (req.params.entidade === 'UsuarioSistema') delete dados.email; // o login (e-mail) não pode ser alterado
+// Atualiza um registro (parcial). Devolve o registro salvo ou null se não existir.
+const atualizar = (def, entidade, id, corpo) => {
+  const dados = prepararDados(def, corpo, { parcial: true });
+  if (entidade === 'UsuarioSistema') delete dados.email; // o login (e-mail) não pode ser alterado
 
-  const existente = db.prepare(`SELECT * FROM ${def.tabela} WHERE id = ?`).get(req.params.id);
-  if (!existente) return res.status(404).json({ message: 'Registro não encontrado' });
+  const existente = db.prepare(`SELECT * FROM ${def.tabela} WHERE id = ?`).get(id);
+  if (!existente) return null;
 
   // Alterou valores ou data de pagamento sem informar o status: recalcula o status.
-  if (
-    req.params.entidade === 'NotaFiscal' &&
-    !('status' in dados) &&
-    CAMPOS_DO_STATUS.some((campo) => campo in dados)
-  ) {
+  if (entidade === 'NotaFiscal' && !('status' in dados) && CAMPOS_DO_STATUS.some((campo) => campo in dados)) {
     dados.status = statusAutomatico({ ...existente, ...dados });
   }
 
@@ -194,10 +189,41 @@ rotasEntidades.put('/:entidade/:id', (req, res) => {
   if (colunas.length) {
     db.prepare(
       `UPDATE ${def.tabela} SET ${colunas.map((c) => `"${c}" = @${c}`).join(', ')}, updated_date = @updated_date WHERE id = @id`,
-    ).run({ ...dados, updated_date: agora(), id: req.params.id });
+    ).run({ ...dados, updated_date: agora(), id });
   }
-  const registro = deBanco(def, db.prepare(`SELECT * FROM ${def.tabela} WHERE id = ?`).get(req.params.id));
-  if (req.params.entidade === 'UsuarioSistema' && 'perfil' in dados) sincronizarPapel(registro);
+  const registro = deBanco(def, db.prepare(`SELECT * FROM ${def.tabela} WHERE id = ?`).get(id));
+  if (entidade === 'UsuarioSistema' && 'perfil' in dados) sincronizarPapel(registro);
+  return registro;
+};
+
+// Atualização em lote: PUT /api/entities/:entidade com [{ id, ...campos }].
+// Tudo numa transação: ou grava todas, ou nenhuma.
+rotasEntidades.put('/:entidade', (req, res) => {
+  const def = obterDef(req.params.entidade);
+  verificarAcesso(req, req.params.entidade, 'escrita');
+  if (!Array.isArray(req.body) || !req.body.length) throw new ErroValidacao('Envie uma lista de registros');
+  if (req.body.length > 1000) throw new ErroValidacao('Envie no máximo 1.000 registros por vez');
+  if (req.body.some((item) => !item || typeof item.id !== 'string')) throw new ErroValidacao('Cada registro precisa do id');
+
+  const salvos = db.transaction(() =>
+    req.body.map(({ id, ...campos }) => {
+      const registro = atualizar(def, req.params.entidade, id, campos);
+      if (!registro) {
+        const erro = new Error(`Registro não encontrado: ${id}`);
+        erro.status = 404;
+        throw erro;
+      }
+      return registro;
+    }),
+  )();
+  res.json(salvos);
+});
+
+rotasEntidades.put('/:entidade/:id', (req, res) => {
+  const def = obterDef(req.params.entidade);
+  verificarAcesso(req, req.params.entidade, 'escrita');
+  const registro = atualizar(def, req.params.entidade, req.params.id, req.body);
+  if (!registro) return res.status(404).json({ message: 'Registro não encontrado' });
   res.json(registro);
 });
 

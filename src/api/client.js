@@ -85,6 +85,8 @@ const entidade = (nome) => {
     create: (dados) => request(base, { method: 'POST', body: dados }),
     bulkCreate: (lista) => request(`${base}/bulk`, { method: 'POST', body: lista }),
     update: (id, dados) => request(`${base}/${encodeURIComponent(id)}`, { method: 'PUT', body: dados }),
+    // Atualiza vários registros de uma vez: [{ id, ...campos }].
+    updateMany: (lista) => request(base, { method: 'PUT', body: lista }),
     delete: (id) => request(`${base}/${encodeURIComponent(id)}`, { method: 'DELETE' }),
     aggregate: (opcoes) => request(`${base}/aggregate`, { method: 'POST', body: opcoes }),
   };

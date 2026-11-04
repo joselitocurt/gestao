@@ -104,6 +104,28 @@ try {
   conferir(paga.dados?.status === 'pago', 'informar a data de pagamento muda o status para pago');
   const manual = await pedir(`/entities/NotaFiscal/${semValor.dados.id}`, { metodo: 'PUT', token, corpo: { status: 'emitido', data_pagamento: null } });
   conferir(manual.dados?.status === 'emitido', 'status informado manualmente é respeitado');
+  // Atualização em lote: status automático em cada nota, tudo ou nada.
+  const ids = notas.dados.map((n) => n.id);
+  const lote = await pedir('/entities/NotaFiscal', {
+    metodo: 'PUT',
+    token,
+    corpo: [
+      { id: ids[0], data_pagamento: '2026-04-01' },
+      { id: ids[1], valor_difal: 8, valor_fcop: 1 },
+    ],
+  });
+  conferir(
+    lote.status === 200 && lote.dados?.[0]?.status === 'pago' && lote.dados?.[1]?.status === 'emitido',
+    'atualização em lote aplica o status automático',
+  );
+  const loteInvalido = await pedir('/entities/NotaFiscal', {
+    metodo: 'PUT',
+    token,
+    corpo: [{ id: ids[1], valor_difal: 99 }, { id: 'nao-existe', valor_difal: 1 }],
+  });
+  const conferencia = await pedir(`/entities/NotaFiscal/${ids[1]}`, { token });
+  conferir(loteInvalido.status === 404 && conferencia.dados?.valor_difal === 8, 'lote com erro não grava nenhuma nota');
+
   await pedir(`/entities/NotaFiscal/${semValor.dados.id}`, { metodo: 'DELETE', token });
 
   const invalida = await pedir('/entities/NotaFiscal', { metodo: 'POST', token, corpo: { serie: '1' } });

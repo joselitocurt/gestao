@@ -18,9 +18,11 @@ import Cnpjs from '@/pages/Cnpjs';
 import Consulta from '@/pages/Consulta';
 import Consolidado from '@/pages/Consolidado';
 import Usuarios from '@/pages/Usuarios';
+import EmissaoLote from '@/pages/EmissaoLote';
 
 const ROTAS = [
   { path: '/', chave: 'apuracao', elemento: <Apuracao />, redirecionar: true },
+  { path: '/lote', chave: 'emissao_lote', elemento: <EmissaoLote /> },
   { path: '/importar', chave: 'importar_xml', elemento: <ImportarXml /> },
   { path: '/notas/nova', chave: 'cadastrar_nota', elemento: <CadastrarNota /> },
   { path: '/cnpjs', chave: 'cnpjs', elemento: <Cnpjs /> },

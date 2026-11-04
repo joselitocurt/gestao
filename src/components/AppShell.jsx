@@ -4,6 +4,7 @@ import {
   BarChart3,
   Building2,
   FilePlus2,
+  Layers,
   LayoutList,
   LogOut,
   Menu,
@@ -26,6 +27,7 @@ const GRUPOS = [
     titulo: 'Apuração',
     itens: [
       { to: '/', label: 'Notas do período', icon: LayoutList, chave: 'apuracao', end: true },
+      { to: '/lote', label: 'Emissão em lote', icon: Layers, chave: 'emissao_lote' },
       { to: '/consulta', label: 'Consultar nota', icon: Search, chave: 'consulta' },
       { to: '/consolidado', label: 'Consolidado', icon: BarChart3, chave: 'consolidado' },
     ],

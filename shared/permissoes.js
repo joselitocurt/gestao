@@ -2,6 +2,7 @@
 
 export const PAGINAS = [
   { chave: 'apuracao', rota: '/', label: 'Apuração' },
+  { chave: 'emissao_lote', rota: '/lote', label: 'Emissão em lote' },
   { chave: 'cadastrar_nota', rota: '/notas/nova', label: 'Cadastrar nota' },
   { chave: 'importar_xml', rota: '/importar', label: 'Importar XML' },
   { chave: 'cnpjs', rota: '/cnpjs', label: 'CNPJs' },

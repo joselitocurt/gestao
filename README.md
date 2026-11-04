@@ -9,6 +9,7 @@ Esta é a versão independente da aplicação que rodava no Base44. Ela tem os m
 | Tela | O que faz |
 |---|---|
 | **Apuração** (`/`) | Lista as notas por CNPJ, mês, ano, UF de destino e número. Mostra o resumo das guias (DIFAL, FCOP, pago e em aberto). Pelo detalhe da nota é possível lançar os valores, mudar o status e anexar o comprovante. |
+| **Emissão em lote** (`/lote`) | Com os mesmos filtros da Apuração e um filtro de status, marca uma ou várias notas (inclusive todas as do filtro). **Emitir lote** abre só as notas marcadas para lançar DIFAL e FCOP de cada uma; **Baixar pagamentos** permite informar a data (uma para todas ou por nota) e anexar o comprovante (um para todas ou por nota). O status segue a regra automática, e o lote é gravado de uma vez (tudo ou nada). Exporta o relatório do lote em PDF. |
 | **Cadastrar nota** (`/notas/nova`) | Cadastro manual com a mesma validação da importação. |
 | **Importar XML** (`/importar`) | Lê vários XMLs de NF-e de uma vez. Só aceita destinatário com CPF e UF de destino diferente da UF do emissor. Ignora duplicadas e cadastra CNPJs novos como filial. |
 | **CNPJs** (`/cnpjs`) | Cadastro da matriz e das filiais. |
