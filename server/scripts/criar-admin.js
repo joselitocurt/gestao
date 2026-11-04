@@ -1,8 +1,10 @@
 // Cria (ou promove) um usuário administrador e define a senha.
 // Uso: npm run criar-admin -- email@empresa.com.br "Senha forte" "Nome"
 import bcrypt from 'bcryptjs';
-import { db, agora } from '../db.js';
+import { abrirBanco, db, agora } from '../db.js';
 import { buscarUsuarioPorEmail, criarUsuario } from '../auth.js';
+
+await abrirBanco();
 
 const [email, senha, nome] = process.argv.slice(2);
 

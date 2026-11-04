@@ -35,7 +35,7 @@ Esta é a versão independente da aplicação que rodava no Base44. Ela tem os m
 ## Tecnologia
 
 - **Frontend:** React 18, Vite, Tailwind, componentes Radix/shadcn, Recharts e jsPDF.
-- **Backend:** Node.js 20+ com Express e banco SQLite (arquivo único em `data/difal.sqlite`).
+- **Backend:** Node.js 20+ com Express e banco SQLite via sql.js (WebAssembly, sem compilação nativa, por isso roda em hospedagem compartilhada). O banco é um arquivo único, `difal.sqlite`, na pasta `DATA_DIR`, gravado a cada alteração.
 - **Login:** e-mail e senha com token JWT. Convite e redefinição de senha funcionam por link enviado por e-mail.
 - **Comprovantes:** ficam guardados em `data/uploads` e só abrem por link assinado, válido por 5 minutos.
 

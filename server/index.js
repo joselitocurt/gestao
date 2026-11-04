@@ -2,29 +2,39 @@ import fs from 'node:fs';
 import path from 'node:path';
 import express from 'express';
 import { IS_PROD, PORT, ROOT_DIR } from './config.js';
-import { db } from './db.js';
+import { abrirBanco, db } from './db.js';
 import { criarUsuario } from './auth.js';
 import { rotasAuth, rotasUsuarios } from './auth.js';
 import { rotasEntidades } from './rotas-entidades.js';
 import { rotasArquivos } from './rotas-arquivos.js';
 
 // Primeiro administrador, criado a partir do .env quando o banco ainda não tem usuários.
-const totalUsuarios = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
-if (!totalUsuarios && process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
-  criarUsuario({
-    email: process.env.ADMIN_EMAIL,
-    full_name: process.env.ADMIN_NOME || null,
-    role: 'admin',
-    senha: process.env.ADMIN_PASSWORD,
-  });
-  console.log(`Administrador inicial criado: ${process.env.ADMIN_EMAIL}`);
-} else if (!totalUsuarios) {
-  console.warn('Nenhum usuário cadastrado. Defina ADMIN_EMAIL e ADMIN_PASSWORD no .env ou rode "npm run criar-admin".');
-}
+const criarAdministradorInicial = () => {
+  const totalUsuarios = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
+  if (!totalUsuarios && process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+    criarUsuario({
+      email: process.env.ADMIN_EMAIL,
+      full_name: process.env.ADMIN_NOME || null,
+      role: 'admin',
+      senha: process.env.ADMIN_PASSWORD,
+    });
+    console.log(`Administrador inicial criado: ${process.env.ADMIN_EMAIL}`);
+  } else if (!totalUsuarios) {
+    console.warn('Nenhum usuário cadastrado. Defina ADMIN_EMAIL e ADMIN_PASSWORD no .env ou rode "npm run criar-admin".');
+  }
+};
+
+// O banco abre de forma assíncrona (WebAssembly). O servidor começa a escutar na hora,
+// e as requisições à API esperam o banco ficar pronto.
+const bancoPronto = abrirBanco().then(criarAdministradorInicial);
+bancoPronto.catch((erro) => console.error('Falha ao abrir o banco de dados:', erro));
 
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
+app.use('/api', (_req, _res, next) => {
+  bancoPronto.then(() => next(), next);
+});
 app.use(express.json({ limit: '10mb' }));
 
 app.use('/api/auth', rotasAuth);

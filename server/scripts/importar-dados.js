@@ -11,9 +11,11 @@
 // Cada e-mail de UsuarioSistema ganha um login sem senha: a pessoa usa "Esqueci a senha" no primeiro acesso.
 
 import fs from 'node:fs';
-import { db, agora } from '../db.js';
+import { abrirBanco, db, agora } from '../db.js';
 import { ENTIDADES, prepararDados } from '../entidades.js';
 import { buscarUsuarioPorEmail, criarUsuario } from '../auth.js';
+
+await abrirBanco();
 
 const arquivo = process.argv[2];
 if (!arquivo) {
