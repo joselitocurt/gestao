@@ -59,7 +59,7 @@ const Marca = ({ compacta = false }) => (
     {compacta ? null : (
       <span className="mt-2 flex items-center gap-2 text-xs font-semibold text-sidebar-foreground">
         <span className="h-px w-4 bg-sidebar-active" aria-hidden="true" />
-        Gestão DIFAL, ICMS e FCOP
+        Gestão de Processos
       </span>
     )}
   </Link>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2 } from 'lucide-react';
 import { api } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,12 +30,7 @@ export default function Login() {
   };
 
   return (
-    <AuthLayout
-      icon={LogIn}
-      title="Entrar"
-      subtitle="Use o e-mail cadastrado pelo administrador."
-      footer={<span className="text-muted-foreground">Ainda sem acesso? Peça o cadastro a um usuário Master.</span>}
-    >
+    <AuthLayout title="Entrar">
       {error && <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
