@@ -1,4 +1,5 @@
 import { formatBRL } from '@/lib/fiscal';
+import { carregarLogoPdf, desenharLogo } from '@/lib/logoPdf';
 
 const MARGEM = 40;
 const DIREITA = 555;
@@ -77,6 +78,7 @@ export const baixarPdfConsolidado = async ({ periodo, totais, linhasUf, linhasCn
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const emAberto = totais.total - totais.pago;
 
+  desenharLogo(doc, await carregarLogoPdf(), DIREITA - 120, 34, 120);
   escrever(doc, 'Consolidado DIFAL + FCOP', MARGEM, 58, { size: 17, negrito: true });
   escrever(doc, periodo, MARGEM, 76, { size: 10, cinza: true });
   escrever(doc, `Total das guias: ${formatBRL(totais.total)}`, MARGEM, 104, { size: 11, negrito: true });

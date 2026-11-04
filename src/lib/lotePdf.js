@@ -1,4 +1,5 @@
 import { STATUS, formatBRL, formatData, formatEmissao } from '@/lib/fiscal';
+import { carregarLogoPdf, desenharLogo } from '@/lib/logoPdf';
 
 // Relatório das notas de um lote (A4 paisagem).
 const M = 32;
@@ -47,12 +48,14 @@ export async function baixarPdfLote({ notas, titulo, emissorDe, observacao }) {
     return y + 18;
   };
 
+  const logo = await carregarLogoPdf();
+  if (logo) desenharLogo(doc, logo, LARGURA - M - 130, 24, 130);
   texto('Gestão DIFAL', M, 40, { size: 9, negrito: true, cinza: true });
   texto(titulo, M, 62, { size: 16, negrito: true });
   texto(
     `Gerado em ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
     LARGURA - M,
-    40,
+    logo ? 80 : 40,
     { size: 8, cinza: true, alinhar: 'right' },
   );
 

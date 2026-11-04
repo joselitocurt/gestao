@@ -28,6 +28,10 @@ module.exports = {
           emitido: 'hsl(var(--status-emitido) / <alpha-value>)',
           pago: 'hsl(var(--status-pago) / <alpha-value>)',
         },
+        dourado: {
+          DEFAULT: 'hsl(var(--dourado) / <alpha-value>)',
+          claro: 'hsl(var(--dourado-claro) / <alpha-value>)',
+        },
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar))',
           foreground: 'hsl(var(--sidebar-foreground))',

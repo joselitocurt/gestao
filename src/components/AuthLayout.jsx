@@ -1,5 +1,4 @@
 import React from 'react';
-import IconeTributario from '@/components/IconeTributario';
 
 // Ilustração do painel: a barra de situação das guias, a mesma linguagem da apuração.
 const BarraGuias = () => (
@@ -28,15 +27,18 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-sidebar p-12 lg:flex">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-sidebar-active text-sidebar">
-            <IconeTributario className="h-[22px] w-[22px]" />
-          </span>
-          <span className="text-lg font-bold text-white">Gestão DIFAL</span>
-        </div>
+        {/* Logomarca completa, versão negativa (fundo azul-marinho) */}
+        <img
+          src="/marca/controlar-horizontal-negativo.svg"
+          alt="Controlar.io, gestão tributária e de processos"
+          className="h-auto w-[300px]"
+          width="516"
+          height="116"
+        />
 
         <div>
-          <p className="max-w-md font-display text-[34px] leading-[1.15] text-white">
+          <p className="text-sm font-bold text-sidebar-active">Gestão DIFAL</p>
+          <p className="mt-2 max-w-md font-display text-[34px] leading-[1.15] text-white">
             DIFAL e FCOP de todas as filiais, apurados por UF de destino.
           </p>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-sidebar-foreground">
@@ -47,15 +49,32 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
           </div>
         </div>
 
-        <p className="text-xs text-sidebar-foreground/60">Acesso restrito a usuários cadastrados.</p>
+        <p className="text-xs text-sidebar-foreground/70">Acesso restrito a usuários cadastrados.</p>
       </aside>
 
       <main className="flex items-center justify-center px-4 py-12 sm:px-8">
         <div className="w-full max-w-sm">
+          {/* No celular o painel da marca some; a logomarca colorida fica acima do formulário */}
+          <img
+            src="/marca/controlar-horizontal.svg"
+            alt="Controlar.io, gestão tributária e de processos"
+            className="mb-10 h-auto w-[240px] lg:hidden dark:hidden"
+            width="516"
+            height="116"
+          />
+          <img
+            src="/marca/controlar-horizontal-negativo.svg"
+            alt="Controlar.io, gestão tributária e de processos"
+            className="mb-10 hidden h-auto w-[240px] dark:block lg:dark:hidden"
+            width="516"
+            height="116"
+          />
           <div className="mb-8">
-            <span className="mb-5 grid h-11 w-11 place-items-center rounded-lg bg-accent text-accent-foreground">
-              <Icon className="h-5 w-5" aria-hidden="true" />
-            </span>
+            {Icon ? (
+              <span className="mb-5 grid h-11 w-11 place-items-center rounded-lg bg-accent text-accent-foreground">
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+            ) : null}
             <h1 className="font-display text-[28px] leading-tight">{title}</h1>
             {subtitle && <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>}
           </div>

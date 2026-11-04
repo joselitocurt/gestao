@@ -6,80 +6,88 @@
 
 @layer base {
   :root {
-    --background: 216 33% 97%;
-    --foreground: 218 50% 12%;
+    /* Marca Controlar.io: azul-marinho #14213D, dourado #A67708 / #E0B44C, cinzas #5B6472 / #AEB6C8 */
+    --background: 220 27% 97%;
+    --foreground: 221 51% 16%;
     --card: 0 0% 100%;
-    --card-foreground: 218 50% 12%;
+    --card-foreground: 221 51% 16%;
     --popover: 0 0% 100%;
-    --popover-foreground: 218 50% 12%;
-    --primary: 234 56% 51%;
+    --popover-foreground: 221 51% 16%;
+    --primary: 221 51% 16%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 22% 94%;
-    --secondary-foreground: 218 40% 18%;
-    --muted: 220 22% 95%;
-    --muted-foreground: 218 12% 42%;
-    --accent: 234 70% 96%;
-    --accent-foreground: 234 56% 40%;
-    --destructive: 356 72% 50%;
+    --secondary: 222 24% 93%;
+    --secondary-foreground: 221 51% 18%;
+    --muted: 222 24% 95%;
+    --muted-foreground: 217 11% 40%;
+    --accent: 222 36% 94%;
+    --accent-foreground: 221 51% 22%;
+    --destructive: 356 72% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 18% 89%;
-    --input: 220 18% 85%;
-    --ring: 234 56% 51%;
+    --border: 222 20% 88%;
+    --input: 222 20% 84%;
+    --ring: 42 91% 34%;
     --radius: 0.625rem;
 
-    --status-pendente: 34 92% 40%;
-    --status-emitido: 196 86% 34%;
-    --status-pago: 152 62% 31%;
+    --dourado: 42 91% 34%;
+    --dourado-claro: 42 71% 59%;
 
-    --chart-1: 234 56% 55%;
-    --chart-2: 172 62% 36%;
-    --chart-3: 34 90% 50%;
-    --chart-4: 330 62% 52%;
-    --chart-5: 196 80% 44%;
+    --status-pendente: 20 86% 45%;
+    --status-emitido: 205 78% 38%;
+    --status-pago: 152 62% 30%;
 
-    --sidebar: 222 47% 11%;
-    --sidebar-foreground: 220 20% 78%;
-    --sidebar-muted: 222 30% 18%;
-    --sidebar-active: 234 70% 66%;
+    --chart-1: 221 46% 30%;
+    --chart-2: 42 91% 40%;
+    --chart-3: 172 55% 34%;
+    --chart-4: 205 70% 50%;
+    --chart-5: 330 50% 50%;
+
+    --sidebar: 221 51% 16%;
+    --sidebar-foreground: 222 19% 73%;
+    --sidebar-muted: 221 40% 23%;
+    --sidebar-active: 42 71% 59%;
 
     --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Manrope', ui-sans-serif, system-ui, sans-serif;
   }
 
   .dark {
-    --background: 222 42% 7%;
+    --background: 222 45% 8%;
     --foreground: 220 25% 94%;
-    --card: 222 34% 10%;
+    --card: 222 40% 11%;
     --card-foreground: 220 25% 94%;
-    --popover: 222 34% 11%;
+    --popover: 222 40% 12%;
     --popover-foreground: 220 25% 94%;
-    --primary: 234 90% 72%;
-    --primary-foreground: 222 47% 10%;
-    --secondary: 222 26% 16%;
+    --primary: 42 71% 59%;
+    --primary-foreground: 221 51% 12%;
+    --secondary: 222 30% 17%;
     --secondary-foreground: 220 25% 90%;
-    --muted: 222 26% 14%;
-    --muted-foreground: 220 14% 64%;
-    --accent: 234 40% 19%;
-    --accent-foreground: 234 90% 84%;
+    --muted: 222 30% 15%;
+    --muted-foreground: 222 19% 68%;
+    --accent: 222 32% 19%;
+    --accent-foreground: 42 71% 72%;
     --destructive: 356 72% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 24% 18%;
-    --input: 222 24% 23%;
-    --ring: 234 90% 72%;
+    --border: 222 26% 19%;
+    --input: 222 26% 24%;
+    --ring: 42 71% 59%;
 
-    --status-pendente: 38 92% 60%;
-    --status-emitido: 192 80% 58%;
+    --dourado: 42 71% 59%;
+    --dourado-claro: 42 71% 66%;
+
+    --status-pendente: 22 90% 62%;
+    --status-emitido: 200 80% 62%;
     --status-pago: 150 55% 52%;
 
-    --chart-1: 234 90% 72%;
-    --chart-2: 170 60% 50%;
-    --chart-3: 38 92% 60%;
-    --chart-4: 330 75% 68%;
-    --chart-5: 192 80% 58%;
+    --chart-1: 222 70% 72%;
+    --chart-2: 42 71% 59%;
+    --chart-3: 170 55% 50%;
+    --chart-4: 200 80% 62%;
+    --chart-5: 330 70% 68%;
 
-    --sidebar: 223 48% 5%;
-    --sidebar-foreground: 220 16% 72%;
-    --sidebar-muted: 222 30% 13%;
+    --sidebar: 223 52% 6%;
+    --sidebar-foreground: 222 19% 70%;
+    --sidebar-muted: 222 38% 13%;
+    --sidebar-active: 42 71% 59%;
   }
 }
 

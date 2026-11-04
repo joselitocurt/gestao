@@ -20,7 +20,6 @@ import { useAuth } from '@/lib/AuthContext';
 import { rotuloPerfil } from '@/lib/permissoes';
 import { useTema } from '@/lib/tema';
 import { cn } from '@/lib/utils';
-import IconeTributario from '@/components/IconeTributario';
 
 const GRUPOS = [
   {
@@ -48,15 +47,21 @@ const GRUPOS = [
   },
 ];
 
-const Marca = () => (
-  <Link to="/" className="flex items-center gap-3 px-2">
-    <span className="grid h-9 w-9 place-items-center rounded-lg bg-sidebar-active text-sidebar">
-      <IconeTributario className="h-5 w-5" />
-    </span>
-    <span className="leading-tight">
-      <span className="block text-[15px] font-bold text-white">Gestão DIFAL</span>
-      <span className="block text-xs text-sidebar-foreground">ICMS e FCOP por UF</span>
-    </span>
+const Marca = ({ compacta = false }) => (
+  <Link to="/" className="block px-2" aria-label="Controlar.io, Gestão DIFAL: início">
+    <img
+      src="/marca/controlar-sem-assinatura-negativo.svg"
+      alt="Controlar.io"
+      className={compacta ? 'h-6 w-auto' : 'h-7 w-auto'}
+      width="492"
+      height="92"
+    />
+    {compacta ? null : (
+      <span className="mt-2 flex items-center gap-2 text-xs font-semibold text-sidebar-foreground">
+        <span className="h-px w-4 bg-sidebar-active" aria-hidden="true" />
+        Gestão DIFAL, ICMS e FCOP
+      </span>
+    )}
   </Link>
 );
 
@@ -184,7 +189,7 @@ export default function AppShell() {
         >
           <Menu className="h-5 w-5" />
         </button>
-        <Marca />
+        <Marca compacta />
       </header>
 
       <Sheet open={menuAberto} onOpenChange={setMenuAberto}>
