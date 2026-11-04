@@ -4,12 +4,13 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Gestão DIFAL ICMS — apuração de DIFAL/FCOP de notas a consumidor final fora da UF",
+  "main": "server.js",
   "scripts": {
     "dev": "concurrently -n api,web -c green,cyan \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "node --watch server/index.js",
     "dev:web": "vite",
     "build": "vite build",
-    "start": "NODE_ENV=production node server/index.js",
+    "start": "node server.js",
     "importar-dados": "node server/scripts/importar-dados.js",
     "criar-admin": "node server/scripts/criar-admin.js"
   },

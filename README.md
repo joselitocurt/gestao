@@ -69,6 +69,16 @@ npm start                 # serve o site e a API na porta PORT (padrão 3001)
 - Configure o SMTP no `.env` para que convites e "Esqueci a senha" sejam enviados. Sem SMTP, os links aparecem no log do servidor.
 - Faça backup da pasta `data/`. Ela guarda o banco e os comprovantes.
 
+### Na Hostinger (hospedagem Business ou Cloud)
+
+Em **Websites → Adicionar site → Node.js web app**, conecte este repositório (branch `main`) e use:
+
+- **Versão do Node:** 22
+- **Comando de build:** `npm run build`
+- **Arquivo de entrada:** `server.js`
+
+Variáveis de ambiente: `NODE_ENV=production`, `APP_URL`, `DATA_DIR` (pasta fora de `domains/`, por exemplo `/home/u123456789/dados-difal`), `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` e, para os e-mails, `SMTP_HOST=smtp.hostinger.com`, `SMTP_PORT=465`, `SMTP_SECURE=true`, `SMTP_USER`, `SMTP_PASS` e `SMTP_FROM`. Não defina `PORT`, porque a Hostinger informa a porta.
+
 ### Com Docker
 
 ```bash
