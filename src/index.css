@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 216 33% 97%;
+    --foreground: 218 50% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 218 50% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 218 50% 12%;
+    --primary: 234 56% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 22% 94%;
+    --secondary-foreground: 218 40% 18%;
+    --muted: 220 22% 95%;
+    --muted-foreground: 218 12% 42%;
+    --accent: 234 70% 96%;
+    --accent-foreground: 234 56% 40%;
+    --destructive: 356 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 18% 89%;
+    --input: 220 18% 85%;
+    --ring: 234 56% 51%;
+    --radius: 0.625rem;
+
+    --status-pendente: 34 92% 40%;
+    --status-emitido: 196 86% 34%;
+    --status-pago: 152 62% 31%;
+
+    --chart-1: 234 56% 55%;
+    --chart-2: 172 62% 36%;
+    --chart-3: 34 90% 50%;
+    --chart-4: 330 62% 52%;
+    --chart-5: 196 80% 44%;
+
+    --sidebar: 222 47% 11%;
+    --sidebar-foreground: 220 20% 78%;
+    --sidebar-muted: 222 30% 18%;
+    --sidebar-active: 234 70% 66%;
+
+    --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .dark {
+    --background: 222 42% 7%;
+    --foreground: 220 25% 94%;
+    --card: 222 34% 10%;
+    --card-foreground: 220 25% 94%;
+    --popover: 222 34% 11%;
+    --popover-foreground: 220 25% 94%;
+    --primary: 234 90% 72%;
+    --primary-foreground: 222 47% 10%;
+    --secondary: 222 26% 16%;
+    --secondary-foreground: 220 25% 90%;
+    --muted: 222 26% 14%;
+    --muted-foreground: 220 14% 64%;
+    --accent: 234 40% 19%;
+    --accent-foreground: 234 90% 84%;
+    --destructive: 356 72% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 24% 18%;
+    --input: 222 24% 23%;
+    --ring: 234 90% 72%;
+
+    --status-pendente: 38 92% 60%;
+    --status-emitido: 192 80% 58%;
+    --status-pago: 150 55% 52%;
+
+    --chart-1: 234 90% 72%;
+    --chart-2: 170 60% 50%;
+    --chart-3: 38 92% 60%;
+    --chart-4: 330 75% 68%;
+    --chart-5: 192 80% 58%;
+
+    --sidebar: 223 48% 5%;
+    --sidebar-foreground: 220 16% 72%;
+    --sidebar-muted: 222 30% 13%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+
+  ::selection {
+    @apply bg-primary/20;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Títulos: mesma família, peso firme e espaçamento justo */
+  .font-display {
+    font-weight: 700;
+    letter-spacing: -0.022em;
+  }
+}
+
+@layer utilities {
+  .numeros {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .painel {
+    @apply rounded-xl border border-border bg-card;
+    box-shadow: 0 1px 0 hsl(var(--foreground) / 0.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
