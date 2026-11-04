@@ -142,6 +142,14 @@ try {
     corpo: { nome: 'Consulta', email: 'consulta@teste.local', perfil: 'consulta', permissoes: ['apuracao', 'consulta', 'consolidado'] },
   });
   conferir(convite.status === 200 && cadastro.status === 201, 'convite e cadastro de usuário com perfil Consulta');
+  conferir(
+    convite.dados?.emailEnviado === false && /\/definir-senha\?token=|token=/.test(convite.dados?.link || ''),
+    'sem e-mail configurado, o convite devolve o link para repassar',
+  );
+  const novaSenha = await pedir('/users/reset-link', { metodo: 'POST', token, corpo: { email: 'consulta@teste.local' } });
+  conferir(novaSenha.status === 200 && Boolean(novaSenha.dados?.link), 'Master gera link de nova senha');
+  const semLogin = await pedir('/users/reset-link', { metodo: 'POST', token, corpo: { email: 'ninguem@teste.local' } });
+  conferir(semLogin.status === 404, 'link de nova senha só para quem já tem acesso');
 
   const semAdmin = await pedir('/entities/UsuarioSistema', { metodo: 'POST', corpo: { nome: 'x', email: 'x@x.com', perfil: 'master' } });
   conferir(semAdmin.status === 401, 'gestão de usuários exige login');

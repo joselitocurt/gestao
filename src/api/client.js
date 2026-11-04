@@ -123,6 +123,8 @@ export const api = {
 
   users: {
     inviteUser: (email, role) => request('/users/invite', { method: 'POST', body: { email, role } }),
+    // Link de nova senha enviado pelo Master: { emailEnviado, link?, motivo? }.
+    resetLink: (email) => request('/users/reset-link', { method: 'POST', body: { email } }),
   },
 
   files: {

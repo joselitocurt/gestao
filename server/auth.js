@@ -52,22 +52,25 @@ function gerarLinkSenha(usuario, validade) {
   return `${APP_URL}/reset-password?token=${token}`;
 }
 
+// Devolve { enviado, motivo, link }: se o e-mail falhar, o link volta para o Master repassar.
 export async function enviarConvite(usuario) {
   const link = gerarLinkSenha(usuario, VALIDADE_CONVITE);
-  await enviarEmail({
+  const envio = await enviarEmail({
     para: usuario.email,
     assunto: 'Convite — Gestão DIFAL ICMS',
     texto: `Você foi cadastrado no sistema Gestão DIFAL ICMS.\n\nDefina sua senha pelo link abaixo (válido por 7 dias):\n${link}\n`,
   });
+  return { ...envio, link };
 }
 
 async function enviarRedefinicao(usuario) {
   const link = gerarLinkSenha(usuario, VALIDADE_RESET);
-  await enviarEmail({
+  const envio = await enviarEmail({
     para: usuario.email,
     assunto: 'Redefinição de senha — Gestão DIFAL ICMS',
     texto: `Recebemos um pedido para redefinir sua senha.\n\nCrie uma nova senha pelo link abaixo (válido por 2 horas):\n${link}\n\nSe você não pediu, ignore este e-mail.\n`,
   });
+  return { ...envio, link };
 }
 
 // ---------------------------------------------------------------- middleware
@@ -177,8 +180,21 @@ rotasUsuarios.post('/invite', autenticar, somenteAdmin, async (req, res, next) =
     if (usuario) definirPapel(email, role);
     else usuario = criarUsuario({ email, role });
 
-    await enviarConvite(usuario);
-    res.json({ ok: true });
+    const envio = await enviarConvite(usuario);
+    // Sem e-mail, o Master recebe o link para repassar (só ele vê esta resposta).
+    res.json(envio.enviado ? { ok: true, emailEnviado: true } : { ok: true, emailEnviado: false, motivo: envio.motivo, link: envio.link });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// Link de nova senha gerado pelo Master na tela de Usuários.
+rotasUsuarios.post('/reset-link', autenticar, somenteAdmin, async (req, res, next) => {
+  try {
+    const usuario = buscarUsuarioPorEmail(req.body?.email);
+    if (!usuario) return res.status(404).json({ message: 'Este e-mail ainda não tem acesso ao sistema.' });
+    const envio = await enviarRedefinicao(usuario);
+    res.json(envio.enviado ? { ok: true, emailEnviado: true } : { ok: true, emailEnviado: false, motivo: envio.motivo, link: envio.link });
   } catch (e) {
     next(e);
   }

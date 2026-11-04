@@ -7,12 +7,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAcesso } from '@/lib/AcessoContext';
 import ListaUsuarios from '@/components/usuarios/ListaUsuarios';
 import UsuarioFormDialog from '@/components/usuarios/UsuarioFormDialog';
+import LinkAcessoDialog from '@/components/usuarios/LinkAcessoDialog';
 import { PERFIS } from '@/lib/permissoes';
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [dialogo, setDialogo] = useState(null);
+  const [linkAcesso, setLinkAcesso] = useState(null);
   const { emailAtual, recarregar } = useAcesso();
   const { toast } = useToast();
 
@@ -38,12 +40,13 @@ export default function Usuarios() {
     } else {
       const existente = await api.entities.UsuarioSistema.filter({ email: dados.email }, { limit: 1 });
       if (existente.items?.length) throw new Error('Já existe um usuário cadastrado com este e-mail.');
-      await api.users.inviteUser(dados.email, dados.perfil === 'master' ? 'admin' : 'user');
+      const convite = await api.users.inviteUser(dados.email, dados.perfil === 'master' ? 'admin' : 'user');
       await api.entities.UsuarioSistema.create(dados);
-      toast({
-        title: 'Usuário cadastrado',
-        description: 'Enviamos um convite ao e-mail para definir a senha.',
-      });
+      if (convite?.emailEnviado) {
+        toast({ title: 'Usuário cadastrado', description: 'Enviamos um convite ao e-mail para definir a senha.' });
+      } else {
+        setLinkAcesso({ titulo: 'Usuário cadastrado', email: dados.email, link: convite?.link, motivo: convite?.motivo, validade: '7 dias' });
+      }
     }
 
     await carregar();
@@ -60,13 +63,17 @@ export default function Usuarios() {
 
   const enviarSenha = async (usuario) => {
     try {
-      await api.auth.resetPasswordRequest(usuario.email);
-      toast({ title: 'Link de nova senha enviado', description: usuario.email });
-    } catch {
+      const resultado = await api.users.resetLink(usuario.email);
+      if (resultado?.emailEnviado) {
+        toast({ title: 'Link de nova senha enviado', description: usuario.email });
+      } else {
+        setLinkAcesso({ titulo: 'Link de nova senha gerado', email: usuario.email, link: resultado?.link, motivo: resultado?.motivo, validade: '2 horas' });
+      }
+    } catch (e) {
       toast({
         variant: 'destructive',
-        title: 'Não foi possível enviar o link',
-        description: 'Tente novamente em alguns instantes.',
+        title: 'Não foi possível gerar o link',
+        description: e.message || 'Tente novamente em alguns instantes.',
       });
     }
   };
@@ -100,6 +107,8 @@ export default function Usuarios() {
         onAlternarAtivo={alternarAtivo}
         onEnviarSenha={enviarSenha}
       />
+
+      <LinkAcessoDialog dados={linkAcesso} onFechar={() => setLinkAcesso(null)} />
 
       <UsuarioFormDialog
         aberto={Boolean(dialogo)}
