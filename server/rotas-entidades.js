@@ -5,6 +5,7 @@ import { autenticar, definirPapel } from './auth.js';
 import { ENTIDADES, ErroValidacao, camposConsultaveis, deBanco, prepararDados } from './entidades.js';
 import { montarOrdem, montarWhere } from './consulta.js';
 import { permissoesEfetivas } from '../shared/permissoes.js';
+import { CAMPOS_DO_STATUS, statusAutomatico } from '../shared/status.js';
 
 export const rotasEntidades = Router();
 rotasEntidades.use(autenticar);
@@ -91,6 +92,12 @@ const sincronizarPapel = (registro) => {
   if (registro?.email && registro?.perfil) definirPapel(registro.email, registro.perfil === 'master' ? 'admin' : 'user');
 };
 
+// Nota fiscal sem status informado: o status é calculado pelos valores e pela data de pagamento.
+const comStatusAutomatico = (entidade, dados) =>
+  entidade === 'NotaFiscal' && dados && typeof dados === 'object' && !dados.status
+    ? { ...dados, status: statusAutomatico(dados) }
+    : dados;
+
 // --------------------------------------------------------------------------- rotas
 
 // Listagem/filtro: GET /api/entities/:entidade?q={...}&sort=campo&limit=50&cursor=...
@@ -151,7 +158,7 @@ rotasEntidades.get('/:entidade/:id', (req, res) => {
 rotasEntidades.post('/:entidade', (req, res) => {
   const def = obterDef(req.params.entidade);
   verificarAcesso(req, req.params.entidade, 'escrita');
-  const registro = inserir(def, prepararDados(def, req.body), req);
+  const registro = inserir(def, prepararDados(def, comStatusAutomatico(req.params.entidade, req.body)), req);
   if (req.params.entidade === 'UsuarioSistema') sincronizarPapel(registro);
   res.status(201).json(registro);
 });
@@ -160,7 +167,7 @@ rotasEntidades.post('/:entidade/bulk', (req, res) => {
   const def = obterDef(req.params.entidade);
   verificarAcesso(req, req.params.entidade, 'escrita');
   if (!Array.isArray(req.body)) throw new ErroValidacao('Envie uma lista de registros');
-  const preparados = req.body.map((item) => prepararDados(def, item));
+  const preparados = req.body.map((item) => prepararDados(def, comStatusAutomatico(req.params.entidade, item)));
   const criados = db.transaction(() => preparados.map((dados) => inserir(def, dados, req)))();
   res.status(201).json(criados);
 });
@@ -171,8 +178,17 @@ rotasEntidades.put('/:entidade/:id', (req, res) => {
   const dados = prepararDados(def, req.body, { parcial: true });
   if (req.params.entidade === 'UsuarioSistema') delete dados.email; // o login (e-mail) não pode ser alterado
 
-  const existente = db.prepare(`SELECT id FROM ${def.tabela} WHERE id = ?`).get(req.params.id);
+  const existente = db.prepare(`SELECT * FROM ${def.tabela} WHERE id = ?`).get(req.params.id);
   if (!existente) return res.status(404).json({ message: 'Registro não encontrado' });
+
+  // Alterou valores ou data de pagamento sem informar o status: recalcula o status.
+  if (
+    req.params.entidade === 'NotaFiscal' &&
+    !('status' in dados) &&
+    CAMPOS_DO_STATUS.some((campo) => campo in dados)
+  ) {
+    dados.status = statusAutomatico({ ...existente, ...dados });
+  }
 
   const colunas = Object.keys(dados);
   if (colunas.length) {

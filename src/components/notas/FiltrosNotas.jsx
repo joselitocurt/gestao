@@ -33,13 +33,14 @@ export default function FiltrosNotas({
 
   return (
     <div className="painel p-4 sm:p-5">
-      <div className="grid grid-cols-2 items-end gap-3 sm:grid-cols-4 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)_92px_104px_minmax(0,1.1fr)_auto]">
+      <div className="grid grid-cols-2 items-end gap-3 sm:grid-cols-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)_minmax(0,0.9fr)_minmax(0,0.9fr)_minmax(0,1fr)_auto]">
         <Campo label="CNPJ emissor" className="col-span-2 sm:col-span-4 lg:col-span-1">
-          <Select value={cnpj || undefined} onValueChange={onCnpj} disabled={!emitentes.length}>
+          <Select value={cnpj || 'todos'} onValueChange={(v) => onCnpj(v === 'todos' ? '' : v)}>
             <SelectTrigger className="h-10 rounded-lg border-border bg-background text-sm">
-              <SelectValue placeholder="Selecione o CNPJ" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="todos">Todos os CNPJs</SelectItem>
               {emitentes.map((e) => (
                 <SelectItem key={e.id} value={e.cnpj}>
                   {nomeEmitente(e)} · {formatCnpj(e.cnpj)}
@@ -55,7 +56,7 @@ export default function FiltrosNotas({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="todos">Todos os meses</SelectItem>
               {MESES.map((nome, i) => (
                 <SelectItem key={nome} value={String(i + 1)}>
                   {nome}
@@ -71,7 +72,7 @@ export default function FiltrosNotas({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="todos">Todos os anos</SelectItem>
               {anos.map((a) => (
                 <SelectItem key={a} value={String(a)}>
                   {a}
@@ -87,7 +88,7 @@ export default function FiltrosNotas({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="todas">Todas</SelectItem>
+              <SelectItem value="todas">Todas as UFs</SelectItem>
               {UFS.map((sigla) => (
                 <SelectItem key={sigla} value={sigla}>
                   {sigla}

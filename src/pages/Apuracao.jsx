@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Building2 } from 'lucide-react';
+import { Building2, ChevronDown, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { api } from '@/api/client';
 import PageHeader from '@/components/PageHeader';
 import FiltrosNotas from '@/components/notas/FiltrosNotas';
@@ -12,21 +13,25 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAcesso } from '@/lib/AcessoContext';
 import { MESES, STATUS, nomeEmitente, ordenarEmitentes } from '@/lib/fiscal';
 
-const hoje = new Date();
+const POR_PAGINA = 100;
 
 export default function Apuracao() {
   const { podeEditar } = useAcesso();
   const { toast } = useToast();
   const [emitentes, setEmitentes] = useState([]);
   const [cnpj, setCnpj] = useState('');
-  const [mes, setMes] = useState(hoje.getMonth() + 1);
-  const [ano, setAno] = useState(hoje.getFullYear());
+  // Todos os filtros começam em "Todos": a lista abre com todas as notas.
+  const [mes, setMes] = useState(0);
+  const [ano, setAno] = useState(0);
   const [busca, setBusca] = useState('');
   const [uf, setUf] = useState('');
   const [status, setStatus] = useState('');
   const [notas, setNotas] = useState([]);
   const [resumo, setResumo] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [cursor, setCursor] = useState(null);
+  const [carregandoMais, setCarregandoMais] = useState(false);
+  const [filtroAtual, setFiltroAtual] = useState(null);
   const [selecionada, setSelecionada] = useState(null);
   const [editando, setEditando] = useState(null);
   const [apagando, setApagando] = useState(null);
@@ -35,20 +40,14 @@ export default function Apuracao() {
     api.entities.Emitente.list().then((itens) => {
       const ordenados = ordenarEmitentes(itens);
       setEmitentes(ordenados);
-      setCnpj((atual) => atual || ordenados[0]?.cnpj || '');
-      if (!ordenados.length) setCarregando(false);
     });
   }, []);
 
   const carregar = useCallback(async () => {
-    if (!cnpj) {
-      setNotas([]);
-      setResumo([]);
-      return;
-    }
     setCarregando(true);
     // Período calculado sobre a data de emissão da nota
-    const base = { emitente_cnpj: cnpj };
+    const base = {};
+    if (cnpj) base.emitente_cnpj = cnpj;
     if (uf) base.destinatario_uf = uf;
 
     const porAnoMes = {};
@@ -73,14 +72,12 @@ export default function Apuracao() {
     if (status) filtroLista.status = status;
     try {
       const [lista, agregado] = await Promise.all([
-        api.entities.NotaFiscal.filter(filtroLista, { sort: 'numero', limit: 500 }),
+        api.entities.NotaFiscal.filter(filtroLista, { sort: '-data_emissao', limit: POR_PAGINA }),
         api.entities.NotaFiscal.aggregate({ query: base, groupBy: 'status', sum: ['valor_difal', 'valor_fcop'] }),
       ]);
-      setNotas(
-        [...(lista.items || [])].sort((a, b) =>
-          String(a.numero).localeCompare(String(b.numero), 'pt-BR', { numeric: true }),
-        ),
-      );
+      setNotas(lista.items || []);
+      setCursor(lista.has_more ? lista.next_cursor : null);
+      setFiltroAtual(filtroLista);
       setResumo(agregado?.rows || []);
     } finally {
       setCarregando(false);
@@ -92,10 +89,25 @@ export default function Apuracao() {
     return () => clearTimeout(timer);
   }, [carregar]);
 
+  // Próxima página da lista (mais recentes primeiro).
+  const carregarMais = async () => {
+    if (!cursor || !filtroAtual) return;
+    setCarregandoMais(true);
+    try {
+      const pagina = await api.entities.NotaFiscal.filter(filtroAtual, { sort: '-data_emissao', limit: POR_PAGINA, cursor });
+      setNotas((atuais) => [...atuais, ...(pagina.items || [])]);
+      setCursor(pagina.has_more ? pagina.next_cursor : null);
+    } finally {
+      setCarregandoMais(false);
+    }
+  };
+
   // Troca rápida de status direto na linha da nota.
   const trocarStatus = async (nota, novo) => {
     const dados = { status: novo };
     if (novo === 'pago' && !nota.data_pagamento) dados.data_pagamento = new Date().toISOString().slice(0, 10);
+    // Fora de "Pago" a nota deixa de ter data de pagamento (senão o status automático voltaria para Pago).
+    if (novo !== 'pago' && nota.data_pagamento) dados.data_pagamento = null;
     setNotas((atuais) => atuais.map((n) => (n.id === nota.id ? { ...n, ...dados } : n)));
     try {
       await api.entities.NotaFiscal.update(nota.id, dados);
@@ -107,6 +119,10 @@ export default function Apuracao() {
   };
 
   const emitenteAtual = emitentes.find((e) => e.cnpj === cnpj);
+  // Total da lista (para "mostrando X de Y"); com busca por número não há total pronto.
+  const totalLista = busca.trim()
+    ? null
+    : resumo.filter((r) => !status || r.status === status).reduce((acc, r) => acc + (r.count || 0), 0);
   const periodo = mes
     ? `${MESES[mes - 1]}${ano ? ` de ${ano}` : ', todos os anos'}`
     : ano
@@ -119,7 +135,12 @@ export default function Apuracao() {
         titulo="Apuração DIFAL e FCOP"
         descricao="Notas a consumidor final (pessoa física) com destino fora da UF do emissor."
         contexto={
-          emitenteAtual ? (
+          !cnpj ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
+              <Building2 className="h-3.5 w-3.5" />
+              Todos os CNPJs
+            </span>
+          ) : emitenteAtual ? (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
               <Building2 className="h-3.5 w-3.5" />
               {nomeEmitente(emitenteAtual)} — {emitenteAtual.tipo === 'matriz' ? 'matriz' : 'filial'} em{' '}
@@ -153,19 +174,38 @@ export default function Apuracao() {
           Notas emitidas
           {status ? <span className="ml-2 text-sm font-medium text-muted-foreground">({STATUS[status].label})</span> : null}
         </h2>
-        <p className="text-sm text-muted-foreground">{periodo}</p>
+        <p className="numeros text-sm text-muted-foreground">
+          {periodo}
+          {!carregando && totalLista !== null && notas.length ? (
+            <span className="ml-2">
+              {notas.length < totalLista
+                ? `mostrando ${notas.length.toLocaleString('pt-BR')} de ${totalLista.toLocaleString('pt-BR')}`
+                : `${totalLista.toLocaleString('pt-BR')} ${totalLista === 1 ? 'nota' : 'notas'}`}
+            </span>
+          ) : null}
+        </p>
       </div>
 
       <TabelaNotas
         notas={notas}
         loading={carregando}
-        filtrado={Boolean(status || busca.trim())}
+        filtrado={Boolean(status || busca.trim() || cnpj || mes || ano || uf)}
         podeEditar={podeEditar}
+        emitenteDe={cnpj ? null : (c) => emitentes.find((e) => e.cnpj === c)}
         onSelect={setSelecionada}
         onEdit={setEditando}
         onDelete={setApagando}
         onStatus={trocarStatus}
       />
+
+      {cursor && !carregando ? (
+        <div className="mt-3 flex justify-center">
+          <Button variant="outline" onClick={carregarMais} disabled={carregandoMais} className="rounded-lg">
+            {carregandoMais ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronDown className="h-4 w-4" />}
+            Carregar mais notas
+          </Button>
+        </div>
+      ) : null}
 
       <NotaDetalheSheet
         nota={selecionada}

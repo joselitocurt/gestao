@@ -40,12 +40,12 @@ const Vazio = ({ filtrado, podeEditar }) => (
       <FileText className="h-5 w-5" />
     </span>
     <p className="mt-4 font-display text-lg">
-      {filtrado ? 'Nenhuma nota com esse filtro' : 'Nenhuma nota neste período'}
+      {filtrado ? 'Nenhuma nota com esses filtros' : 'Nenhuma nota cadastrada'}
     </p>
     <p className="mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
       {filtrado
-        ? 'Remova o filtro de status ou de número para ver as outras notas do período.'
-        : 'Importe os XMLs das notas emitidas ou escolha outro CNPJ, mês ou ano.'}
+        ? 'Volte algum filtro para "Todos" ou remova o filtro de status para ver mais notas.'
+        : 'Importe os XMLs das notas emitidas ou cadastre uma nota para começar a apuração.'}
     </p>
     {!filtrado && podeEditar ? (
       <Button asChild className="mt-5">
@@ -58,8 +58,8 @@ const Vazio = ({ filtrado, podeEditar }) => (
   </div>
 );
 
-export default function TabelaNotas({ notas, loading, filtrado, podeEditar, onSelect, onEdit, onDelete, onStatus }) {
-  const props = { onSelect, onEdit, onDelete, onStatus, podeEditar };
+export default function TabelaNotas({ notas, loading, filtrado, podeEditar, emitenteDe, onSelect, onEdit, onDelete, onStatus }) {
+  const props = { onSelect, onEdit, onDelete, onStatus, podeEditar, emitenteDe };
   return (
     <div className="painel mt-3 overflow-hidden">
       {loading ? (

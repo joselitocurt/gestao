@@ -1,13 +1,14 @@
 import React from 'react';
 import StatusBadge from '@/components/notas/StatusBadge';
 import AcoesNota from '@/components/notas/AcoesNota';
-import { formatBRL, formatCpf, formatData, formatEmissao, totalGuia } from '@/lib/fiscal';
+import { formatBRL, formatCpf, formatData, formatEmissao, nomeEmitente, totalGuia } from '@/lib/fiscal';
 
-export const COLUNAS = 'grid-cols-[64px_minmax(0,1fr)_82px_96px_86px_76px_94px_112px_82px_72px]';
+export const COLUNAS = 'grid-cols-[104px_minmax(0,1fr)_82px_96px_86px_76px_94px_112px_82px_72px]';
 
 const Vazio = () => <span className="text-muted-foreground/60">—</span>;
 
-export default function NotaRow({ nota, onSelect, onEdit, onDelete, onStatus, podeEditar }) {
+export default function NotaRow({ nota, onSelect, onEdit, onDelete, onStatus, podeEditar, emitenteDe }) {
+  const emissor = emitenteDe ? nomeEmitente(emitenteDe(nota.emitente_cnpj) || { cnpj: nota.emitente_cnpj }) : null;
   return (
     <div
       role="button"
@@ -24,7 +25,9 @@ export default function NotaRow({ nota, onSelect, onEdit, onDelete, onStatus, po
     >
       <div className="min-w-0">
         <p className="numeros font-semibold leading-tight">{nota.numero || '—'}</p>
-        <p className="numeros text-xs text-muted-foreground">Série {nota.serie || '—'}</p>
+        <p className="numeros truncate text-xs text-muted-foreground" title={emissor || undefined}>
+          {emissor || `Série ${nota.serie || '—'}`}
+        </p>
       </div>
 
       <div className="min-w-0">

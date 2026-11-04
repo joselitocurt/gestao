@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/api/client';
 import StatusBadge from '@/components/notas/StatusBadge';
+import { CAMPOS_DO_STATUS, statusAutomatico } from '@shared/status.js';
 import { STATUS_OPTIONS, formatBRL, formatCpf, formatEmissao } from '@/lib/fiscal';
 
 const INICIAL = {
@@ -39,7 +40,13 @@ export default function NotaDetalheSheet({ nota, onClose, onSaved, somenteLeitur
     });
   }, [nota]);
 
-  const alterar = (campo, valor) => setForm((atual) => ({ ...atual, [campo]: valor }));
+  // Valores e data de pagamento definem o status: DIFAL/FCOP lançado → Emitida; data de pagamento → Pago.
+  const alterar = (campo, valor) =>
+    setForm((atual) => {
+      const novo = { ...atual, [campo]: valor };
+      if (CAMPOS_DO_STATUS.includes(campo)) novo.status = statusAutomatico(novo);
+      return novo;
+    });
 
   const alterarStatus = (valor) => {
     const hoje = new Date().toISOString().slice(0, 10);
@@ -224,6 +231,10 @@ export default function NotaDetalheSheet({ nota, onClose, onSaved, somenteLeitur
                   />
                 </div>
               </div>
+              <p className="-mt-2 text-xs leading-relaxed text-muted-foreground">
+                O status muda sozinho: ao lançar DIFAL ou FCOP fica <span className="font-semibold text-status-emitido">Emitida</span>;
+                ao informar a data do pagamento fica <span className="font-semibold text-status-pago">Pago</span>.
+              </p>
 
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">

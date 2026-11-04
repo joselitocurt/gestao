@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from '@/components/notas/StatusBadge';
 import AcoesNota from '@/components/notas/AcoesNota';
-import { formatBRL, formatCpf, formatData, formatEmissao, totalGuia } from '@/lib/fiscal';
+import { formatBRL, formatCpf, formatData, formatEmissao, nomeEmitente, totalGuia } from '@/lib/fiscal';
 
 const Valor = ({ label, children, forte }) => (
   <div>
@@ -10,7 +10,8 @@ const Valor = ({ label, children, forte }) => (
   </div>
 );
 
-export default function NotaCard({ nota, onSelect, onEdit, onDelete, onStatus, podeEditar }) {
+export default function NotaCard({ nota, onSelect, onEdit, onDelete, onStatus, podeEditar, emitenteDe }) {
+  const emissor = emitenteDe ? nomeEmitente(emitenteDe(nota.emitente_cnpj) || { cnpj: nota.emitente_cnpj }) : null;
   return (
     <div
       role="button"
@@ -29,7 +30,7 @@ export default function NotaCard({ nota, onSelect, onEdit, onDelete, onStatus, p
         <div className="min-w-0">
           <p className="numeros text-sm font-semibold">
             NF {nota.numero || '—'}
-            <span className="ml-1.5 text-xs font-normal text-muted-foreground">Série {nota.serie || '—'}</span>
+            <span className="ml-1.5 text-xs font-normal text-muted-foreground">{emissor || `Série ${nota.serie || '—'}`}</span>
           </p>
           <p className="mt-0.5 truncate text-sm">{nota.destinatario_nome || '—'}</p>
         </div>

@@ -95,6 +95,17 @@ try {
   const pago = agregado.dados?.rows?.find((r) => r.status === 'pago');
   conferir(pago?.sum_valor_difal === 10 && pago?.sum_valor_fcop === 2, 'soma por status');
 
+  // Status automático: DIFAL/FCOP → emitido; data de pagamento → pago; sem valores → a_emitir.
+  const semValor = await pedir('/entities/NotaFiscal', { metodo: 'POST', token, corpo: { numero: '3', emitente_cnpj: '11222333000181' } });
+  conferir(semValor.dados?.status === 'a_emitir', 'nota sem valores entra como a_emitir');
+  const comValor = await pedir(`/entities/NotaFiscal/${semValor.dados.id}`, { metodo: 'PUT', token, corpo: { valor_fcop: 3 } });
+  conferir(comValor.dados?.status === 'emitido', 'lançar DIFAL/FCOP muda o status para emitido');
+  const paga = await pedir(`/entities/NotaFiscal/${semValor.dados.id}`, { metodo: 'PUT', token, corpo: { data_pagamento: '2026-03-10' } });
+  conferir(paga.dados?.status === 'pago', 'informar a data de pagamento muda o status para pago');
+  const manual = await pedir(`/entities/NotaFiscal/${semValor.dados.id}`, { metodo: 'PUT', token, corpo: { status: 'emitido', data_pagamento: null } });
+  conferir(manual.dados?.status === 'emitido', 'status informado manualmente é respeitado');
+  await pedir(`/entities/NotaFiscal/${semValor.dados.id}`, { metodo: 'DELETE', token });
+
   const invalida = await pedir('/entities/NotaFiscal', { metodo: 'POST', token, corpo: { serie: '1' } });
   conferir(invalida.status === 400, 'campos obrigatórios validados');
 

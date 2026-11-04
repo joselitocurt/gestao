@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UFS, apenasDigitos, formatCnpj, nomeEmitente, ordenarEmitentes } from '@/lib/fiscal';
 import { classificarNfe } from '@/lib/nfeXml';
+import { statusAutomatico } from '@shared/status.js';
 import CampoFormulario from '@/components/notas/CampoFormulario';
 
 const hoje = () => new Date().toISOString().slice(0, 10);
@@ -107,12 +108,13 @@ export default function NotaManualForm({ nota, onSaved, onCancel }) {
 
     try {
       if (editando) {
+        // Sem status no envio: o servidor recalcula pelos valores e pela data de pagamento.
         await api.entities.NotaFiscal.update(nota.id, dados);
         onSaved?.();
         return;
       }
 
-      await api.entities.NotaFiscal.create({ ...dados, status: 'a_emitir' });
+      await api.entities.NotaFiscal.create({ ...dados, status: statusAutomatico(dados) });
       setSalva({ numero: dados.numero });
       setForm({ ...formularioVazio(), emitente_cnpj: dados.emitente_cnpj });
     } catch (err) {
@@ -303,14 +305,12 @@ export default function NotaManualForm({ nota, onSaved, onCancel }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[12px] text-muted-foreground">
-          {editando ? (
-            <>O status de pagamento continua o mesmo e pode ser atualizado no detalhe.</>
-          ) : (
-            <>
-              A nota entra como <span className="font-medium text-foreground">A emitir</span> e pode ser atualizada no
-              detalhe.
-            </>
-          )}
+          Status automático: com DIFAL ou FCOP a nota fica <span className="font-medium text-status-emitido">Emitida</span>
+          {editando ? '; se já tiver data de pagamento, continua ' : '; sem valores, fica '}
+          <span className={editando ? 'font-medium text-status-pago' : 'font-medium text-status-pendente'}>
+            {editando ? 'Pago' : 'A emitir'}
+          </span>
+          .
         </p>
         <div className="flex items-center gap-2">
           {editando ? (
