@@ -19,6 +19,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { rotuloPerfil } from '@/lib/permissoes';
 import { useTema } from '@/lib/tema';
 import { cn } from '@/lib/utils';
+import IconeTributario from '@/components/IconeTributario';
 
 const GRUPOS = [
   {
@@ -47,11 +48,11 @@ const GRUPOS = [
 
 const Marca = () => (
   <Link to="/" className="flex items-center gap-3 px-2">
-    <span className="grid h-9 w-9 place-items-center rounded-lg bg-sidebar-active text-[15px] font-extrabold text-sidebar">
-      D
+    <span className="grid h-9 w-9 place-items-center rounded-lg bg-sidebar-active text-sidebar">
+      <IconeTributario className="h-5 w-5" />
     </span>
     <span className="leading-tight">
-      <span className="block text-[15px] font-bold text-white">Guia DIFAL</span>
+      <span className="block text-[15px] font-bold text-white">Gestão DIFAL</span>
       <span className="block text-xs text-sidebar-foreground">ICMS e FCOP por UF</span>
     </span>
   </Link>

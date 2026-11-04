@@ -1,4 +1,5 @@
 import React from 'react';
+import IconeTributario from '@/components/IconeTributario';
 
 // Ilustração do painel: a barra de situação das guias, a mesma linguagem da apuração.
 const BarraGuias = () => (
@@ -28,10 +29,10 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
     <div className="grid min-h-screen bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-sidebar p-12 lg:flex">
         <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-sidebar-active text-base font-extrabold text-sidebar">
-            D
+          <span className="grid h-10 w-10 place-items-center rounded-lg bg-sidebar-active text-sidebar">
+            <IconeTributario className="h-[22px] w-[22px]" />
           </span>
-          <span className="text-lg font-bold text-white">Guia DIFAL</span>
+          <span className="text-lg font-bold text-white">Gestão DIFAL</span>
         </div>
 
         <div>
