@@ -18,11 +18,8 @@ const COLUNAS = [
   { chave: 'pagamento', titulo: 'PAGAMENTO', x: M + 722, w: 56 },
 ];
 
-// Chave de acesso em blocos de 4 dígitos, como no DANFE.
-const formatarChave = (chave) => {
-  const d = apenasDigitos(chave);
-  return d ? d.replace(/(\d{4})(?=\d)/g, '$1 ') : '—';
-};
+// Chave de acesso: só os 44 dígitos, sem espaços.
+const formatarChave = (chave) => apenasDigitos(chave) || '—';
 
 const cortar = (doc, texto, largura) => {
   let t = String(texto ?? '');
