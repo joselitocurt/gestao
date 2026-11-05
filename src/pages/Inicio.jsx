@@ -37,7 +37,7 @@ function CartaoModulo({ modulo, liberado }) {
 }
 
 export default function Inicio() {
-  const { registro, emailAtual, temAcesso } = useAcesso();
+  const { registro, emailAtual, temAcesso, perfil } = useAcesso();
   const primeiroNome = (registro?.nome || emailAtual || '').split(/[\s@]/)[0];
   const liberado = (m) => paginasDoModulo(m.id).some((p) => temAcesso(p.chave));
 
@@ -61,7 +61,7 @@ export default function Inicio() {
         </div>
       </div>
 
-      {temAcesso('usuarios') ? (
+      {perfil === 'master' ? (
         <section className="mt-12">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Administração</h2>
           <Link
