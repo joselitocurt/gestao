@@ -89,7 +89,7 @@ export default function Usuarios() {
         </Button>}
       />
 
-      <div className="mt-5 grid gap-2 sm:grid-cols-3">
+      <div className="mt-5 grid gap-2 sm:grid-cols-2">
         {Object.entries(PERFIS).map(([chave, perfil]) => (
           <div key={chave} className="painel px-3.5 py-3">
             <p className="text-xs font-medium text-muted-foreground">{perfil.label}</p>

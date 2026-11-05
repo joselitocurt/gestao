@@ -8,7 +8,6 @@ import { rotuloPerfil } from '@/lib/permissoes';
 const TOM = {
   master: 'bg-[hsl(var(--chart-4))]/15 text-[hsl(var(--chart-4))] ring-[hsl(var(--chart-4))]/30',
   usuario: 'bg-status-emitido/10 text-status-emitido ring-status-emitido/25',
-  consulta: 'bg-muted text-muted-foreground ring-border',
 };
 
 export default function UsuarioLinha({ usuario, ehVoce, onEditar, onAlternarAtivo, onEnviarSenha }) {
@@ -30,7 +29,7 @@ export default function UsuarioLinha({ usuario, ehVoce, onEditar, onAlternarAtiv
       </div>
 
       <span
-        className={cn('rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset', TOM[usuario.perfil] || TOM.consulta)}
+        className={cn('rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset', TOM[usuario.perfil] || TOM.usuario)}
       >
         {rotuloPerfil(usuario.perfil)}
       </span>

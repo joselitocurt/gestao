@@ -139,9 +139,9 @@ try {
   const cadastro = await pedir('/entities/UsuarioSistema', {
     metodo: 'POST',
     token,
-    corpo: { nome: 'Consulta', email: 'consulta@teste.local', perfil: 'consulta', permissoes: ['apuracao', 'consulta', 'consolidado'] },
+    corpo: { nome: 'Consulta', email: 'consulta@teste.local', perfil: 'usuario', permissoes: ['consulta', 'consolidado'] },
   });
-  conferir(convite.status === 200 && cadastro.status === 201, 'convite e cadastro de usuário com perfil Consulta');
+  conferir(convite.status === 200 && cadastro.status === 201, 'convite e cadastro de Usuário com páginas escolhidas');
   conferir(
     convite.dados?.emailEnviado === false && /\/definir-senha\?token=|token=/.test(convite.dados?.link || ''),
     'sem e-mail configurado, o convite devolve o link para repassar',
@@ -150,6 +150,31 @@ try {
   conferir(novaSenha.status === 200 && Boolean(novaSenha.dados?.link), 'Master gera link de nova senha');
   const semLogin = await pedir('/users/reset-link', { metodo: 'POST', token, corpo: { email: 'ninguem@teste.local' } });
   conferir(semLogin.status === 404, 'link de nova senha só para quem já tem acesso');
+
+  const perfilAntigo = await pedir('/entities/UsuarioSistema', {
+    metodo: 'POST',
+    token,
+    corpo: { nome: 'Antigo', email: 'antigo@teste.local', perfil: 'consulta' },
+  });
+  conferir(perfilAntigo.status === 400, 'só existem os perfis Master e Usuário');
+
+  // O Usuário só grava nas páginas marcadas: com Consulta e Consolidado, não altera notas.
+  const tokenLink = new URL(novaSenha.dados.link).searchParams.get('token');
+  await pedir('/auth/reset', { metodo: 'POST', corpo: { resetToken: tokenLink, newPassword: 'senhaUsuario1' } });
+  const loginUsuario = await pedir('/auth/login', { metodo: 'POST', corpo: { email: 'consulta@teste.local', password: 'senhaUsuario1' } });
+  const tokenUsuario = loginUsuario.dados?.access_token;
+  const leitura = await pedir('/entities/NotaFiscal', { token: tokenUsuario });
+  const gravacao = await pedir('/entities/NotaFiscal', { metodo: 'POST', token: tokenUsuario, corpo: { numero: '9', emitente_cnpj: '1' } });
+  conferir(Boolean(tokenUsuario) && leitura.status === 200 && gravacao.status === 403, 'Usuário lê, mas só grava nas páginas permitidas');
+  await pedir(`/entities/UsuarioSistema/${cadastro.dados.id}`, {
+    metodo: 'PUT',
+    token,
+    corpo: { permissoes: ['consulta', 'consolidado', 'cadastrar_nota'] },
+  });
+  const gravacaoLiberada = await pedir('/entities/NotaFiscal', { metodo: 'POST', token: tokenUsuario, corpo: { numero: '9', emitente_cnpj: '1' } });
+  conferir(gravacaoLiberada.status === 201, 'ao marcar Cadastrar nota, o Usuário passa a gravar notas');
+  const usuariosNegado = await pedir('/entities/UsuarioSistema', { metodo: 'POST', token: tokenUsuario, corpo: { nome: 'x', email: 'y@x.com', perfil: 'master' } });
+  conferir(usuariosNegado.status === 403, 'administração de usuários é exclusiva do Master');
 
   const semAdmin = await pedir('/entities/UsuarioSistema', { metodo: 'POST', corpo: { nome: 'x', email: 'x@x.com', perfil: 'master' } });
   conferir(semAdmin.status === 401, 'gestão de usuários exige login');

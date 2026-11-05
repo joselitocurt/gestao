@@ -55,8 +55,8 @@ export const ENTIDADES = {
       permissoes: 'array',
     },
     obrigatorios: ['nome', 'email', 'perfil'],
-    enums: { perfil: ['master', 'usuario', 'consulta'] },
-    padroes: { perfil: 'consulta', ativo: true },
+    enums: { perfil: ['master', 'usuario'] },
+    padroes: { perfil: 'usuario', ativo: true },
   },
 };
 

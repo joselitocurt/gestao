@@ -47,7 +47,6 @@ function verificarAcesso(req, entidade, operacao) {
   if (cadastro.ativo === false) throw negar('Seu acesso está desativado.');
 
   if (operacao === 'escrita') {
-    if (cadastro.perfil === 'consulta') throw negar('O perfil Consulta é somente visualização.');
     const permissoes = permissoesEfetivas(cadastro);
     if (!ESCRITA[entidade].some((chave) => permissoes.includes(chave))) throw negar();
   }

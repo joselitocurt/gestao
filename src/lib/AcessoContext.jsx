@@ -54,8 +54,7 @@ export const AcessoProvider = ({ children }) => {
     carregando,
     registro,
     perfil: registro?.perfil || null,
-    // Perfil Consulta é somente visualização.
-    podeEditar: Boolean(registro) && registro.perfil !== 'consulta',
+    podeEditar: Boolean(registro),
     ativo: Boolean(registro) && registro.ativo !== false,
     permissoes,
     temAcesso,

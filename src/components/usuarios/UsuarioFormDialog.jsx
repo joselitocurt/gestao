@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldCheck } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -14,15 +14,15 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PermissoesChecklist from '@/components/usuarios/PermissoesChecklist';
-import { PERFIL_OPTIONS, PERFIS, permissoesDoPerfil } from '@/lib/permissoes';
+import { PERFIL_OPTIONS, PERFIS } from '@/lib/permissoes';
 
 export default function UsuarioFormDialog({ aberto, usuario, onFechar, onSalvar }) {
   const novo = !usuario;
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
-  const [perfil, setPerfil] = useState('consulta');
+  const [perfil, setPerfil] = useState('usuario');
   const [ativo, setAtivo] = useState(true);
-  const [permissoes, setPermissoes] = useState(permissoesDoPerfil('consulta'));
+  const [permissoes, setPermissoes] = useState([]);
   const [erro, setErro] = useState('');
   const [salvando, setSalvando] = useState(false);
 
@@ -32,21 +32,20 @@ export default function UsuarioFormDialog({ aberto, usuario, onFechar, onSalvar 
     setSalvando(false);
     setNome(usuario?.nome || '');
     setEmail(usuario?.email || '');
-    setPerfil(usuario?.perfil || 'consulta');
+    setPerfil(usuario?.perfil === 'master' ? 'master' : 'usuario');
     setAtivo(usuario ? usuario.ativo !== false : true);
-    setPermissoes(
-      usuario && Array.isArray(usuario.permissoes) ? usuario.permissoes : permissoesDoPerfil(usuario?.perfil || 'consulta'),
-    );
+    setPermissoes(Array.isArray(usuario?.permissoes) ? usuario.permissoes.filter((p) => p !== 'usuarios') : []);
   }, [aberto, usuario]);
 
-  const trocarPerfil = (novoPerfil) => {
-    setPerfil(novoPerfil);
-    setPermissoes(permissoesDoPerfil(novoPerfil));
-  };
+  const trocarPerfil = (novoPerfil) => setPerfil(novoPerfil);
 
   const salvar = async (evento) => {
     evento.preventDefault();
     setErro('');
+    if (perfil === 'usuario' && !permissoes.length) {
+      setErro('Marque ao menos uma página que este usuário poderá acessar.');
+      return;
+    }
     setSalvando(true);
     try {
       await onSalvar({
@@ -54,7 +53,8 @@ export default function UsuarioFormDialog({ aberto, usuario, onFechar, onSalvar 
         email: email.trim().toLowerCase(),
         perfil,
         ativo,
-        permissoes,
+        // Master tem acesso total; a lista só vale para o perfil Usuário.
+        permissoes: perfil === 'master' ? [] : permissoes,
       });
     } catch (err) {
       setErro(err.message || 'Não foi possível salvar o usuário.');
@@ -128,9 +128,25 @@ export default function UsuarioFormDialog({ aberto, usuario, onFechar, onSalvar 
 
           <div className="space-y-2">
             <Label>Permissões de acesso</Label>
-            <PermissoesChecklist permissoes={permissoes} onChange={setPermissoes} desabilitado={perfil === 'master'} />
-            {perfil === 'master' && (
-              <p className="text-xs text-muted-foreground">O perfil Master tem acesso a todas as páginas.</p>
+            {perfil === 'master' ? (
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-accent/40 px-3 py-3">
+                <ShieldCheck className="h-5 w-5 shrink-0 text-primary dark:text-dourado" />
+                <p className="text-[13px] leading-snug">
+                  <span className="font-semibold">Acesso total.</span> O Master abre todos os módulos e páginas, inclusive a
+                  administração de usuários.
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground">Marque as páginas que este usuário poderá abrir em cada módulo.</p>
+                <PermissoesChecklist
+                  permissoes={permissoes}
+                  onChange={(lista) => {
+                    setPermissoes(lista);
+                    setErro('');
+                  }}
+                />
+              </>
             )}
           </div>
 

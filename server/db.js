@@ -69,7 +69,7 @@ const ESQUEMA = `
     id TEXT PRIMARY KEY,
     nome TEXT NOT NULL,
     email TEXT NOT NULL COLLATE NOCASE,
-    perfil TEXT NOT NULL DEFAULT 'consulta' CHECK (perfil IN ('master', 'usuario', 'consulta')),
+    perfil TEXT NOT NULL DEFAULT 'usuario' CHECK (perfil IN ('master', 'usuario', 'consulta')),
     ativo INTEGER DEFAULT 1,
     permissoes TEXT,
     created_by TEXT,
@@ -229,6 +229,11 @@ export async function abrirBanco() {
   comTrava(() => {
     sincronizar();
     banco.exec(ESQUEMA);
+    // O perfil Consulta deixou de existir: vira Usuário com as mesmas páginas marcadas.
+    banco.exec("UPDATE usuario_sistema SET perfil = 'usuario' WHERE perfil = 'consulta'");
+    // Usuário antigo sem páginas gravadas usava o padrão do perfil: grava essas páginas explicitamente.
+    banco.exec(`UPDATE usuario_sistema SET permissoes = '["apuracao","emissao_lote","cadastrar_nota","importar_xml","cnpjs","consulta","consolidado"]'
+                WHERE perfil = 'usuario' AND (permissoes IS NULL OR permissoes = '')`);
     salvar();
   });
   return db;
