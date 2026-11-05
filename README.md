@@ -6,16 +6,30 @@ Esta é a versão independente da aplicação que rodava no Base44. Ela tem os m
 
 ## O que tem no sistema
 
+O sistema é modular. Depois do login, a **página inicial** (`/`) mostra os módulos disponíveis (ícone, nome e botão **Abrir**). Dentro de um módulo, a logomarca no canto superior volta para a página inicial. Para o perfil Master, a página inicial também tem a área **Administração**, com Usuários e permissões.
+
+Os módulos ficam em `src/lib/modulos.js`. Para criar um novo: inclua o módulo nesse arquivo, cadastre as páginas dele em `shared/permissoes.js` (com o campo `modulo`) e as rotas em `src/App.jsx`. As páginas do novo módulo aparecem sozinhas no cadastro de permissões.
+
+### Módulo I: Gestão DIFAL (`/difal`)
+
+Endereços antigos (como `/consolidado`) redirecionam para o novo (`/difal/consolidado`).
+
 | Tela | O que faz |
 |---|---|
-| **Apuração** (`/`) | Lista as notas por CNPJ, mês, ano, UF de destino e número. Mostra o resumo das guias (DIFAL, FCOP, pago e em aberto). Pelo detalhe da nota é possível lançar os valores, mudar o status e anexar o comprovante. |
-| **Emissão em lote** (`/lote`) | Com os mesmos filtros da Apuração e um filtro de status, marca uma ou várias notas (inclusive todas as do filtro). **Emitir lote** abre só as notas marcadas para lançar DIFAL e FCOP de cada uma; **Baixar pagamentos** permite informar a data (uma para todas ou por nota) e anexar o comprovante (um para todas ou por nota). O status segue a regra automática, e o lote é gravado de uma vez (tudo ou nada). Exporta o relatório do lote em PDF. |
-| **Cadastrar nota** (`/notas/nova`) | Cadastro manual com a mesma validação da importação. |
-| **Importar XML** (`/importar`) | Lê vários XMLs de NF-e de uma vez. Só aceita destinatário com CPF e UF de destino diferente da UF do emissor. Ignora duplicadas e cadastra CNPJs novos como filial. |
-| **CNPJs** (`/cnpjs`) | Cadastro da matriz e das filiais. |
-| **Consulta** (`/consulta`) | Busca uma nota pelo CNPJ e pelo número, com acesso ao comprovante. |
-| **Consolidado** (`/consolidado`) | Painel com o total geral e filtros por CNPJ, ano, mês e UF de destino. Tem evolução mensal, rankings por UF e por CNPJ, gráfico UF × CNPJ e exportação em PDF e CSV (Excel). |
-| **Usuários** (`/usuarios`) | Perfis **Master**, **Usuário** e **Consulta**, permissões por página, ativar ou inativar, convite e envio de link de senha. |
+| **Apuração** (`/difal`) | Lista as notas por CNPJ, mês, ano, UF de destino e número. Mostra o resumo das guias (DIFAL, FCOP, pago e em aberto). Pelo detalhe da nota é possível lançar os valores, mudar o status e anexar o comprovante. |
+| **Emissão em lote** (`/difal/lote`) | Com os mesmos filtros da Apuração e um filtro de status, marca uma ou várias notas (inclusive todas as do filtro). **Emitir lote** abre só as notas marcadas para lançar DIFAL e FCOP de cada uma; **Baixar pagamentos** permite informar a data (uma para todas ou por nota) e anexar o comprovante (um para todas ou por nota). O status segue a regra automática, e o lote é gravado de uma vez (tudo ou nada). Exporta o relatório do lote em PDF. |
+| **Cadastrar nota** (`/difal/notas/nova`) | Cadastro manual com a mesma validação da importação. |
+| **Importar XML** (`/difal/importar`) | Lê vários XMLs de NF-e de uma vez. Só aceita destinatário com CPF e UF de destino diferente da UF do emissor. Ignora duplicadas e cadastra CNPJs novos como filial. |
+| **CNPJs emissores** (`/difal/cnpjs`) | Cadastro da matriz e das filiais. |
+| **Consultar nota** (`/difal/consulta`) | Busca uma nota pelo CNPJ e pelo número, com acesso ao comprovante. |
+| **Consolidado** (`/difal/consolidado`) | Painel com o total geral e filtros por CNPJ, ano, mês e UF de destino. Tem evolução mensal, rankings por UF e por CNPJ, gráfico UF × CNPJ e exportação em PDF e CSV (Excel). |
+
+### Administração (`/usuarios`, só Master)
+
+- **Master:** acesso total a todos os módulos e páginas, inclusive Usuários.
+- **Usuário:** acessa apenas as páginas marcadas no seu cadastro, escolhidas uma a uma e agrupadas por módulo (não há permissões padrão). Pode alterar dados nas páginas liberadas.
+- Ativar ou inativar, convite e link de senha. Se o e-mail não puder ser enviado, o link aparece na tela para ser repassado, com o motivo da falha.
+- O antigo perfil Consulta foi extinto: esses cadastros viram Usuário com as mesmas páginas.
 
 ## Interface
 
@@ -30,7 +44,7 @@ Esta é a versão independente da aplicação que rodava no Base44. Ela tem os m
   - **gráfico UF × CNPJ**: clicar numa barra filtra a UF, e a legenda oculta CNPJs.
 
   Os filtros se cruzam: cada gráfico considera os demais filtros e mantém o item escolhido em destaque entre os outros. Os filtros ativos aparecem como etiquetas removíveis, e "Ver tudo" volta ao total. As exportações em PDF e Excel saem com os filtros aplicados.
-- **Perfil Consulta:** é somente visualização. Os botões de edição não aparecem, e o servidor recusa gravações vindas desse perfil.
+- **Permissões no servidor:** o servidor recusa gravações de páginas que o usuário não tem liberadas, além de qualquer alteração em usuários feita por quem não é Master.
 - **Cores e fonte:** ficam em `src/index.css` (variáveis CSS) e `tailwind.config.cjs`. A fonte é a Manrope.
 
 ## Tecnologia
