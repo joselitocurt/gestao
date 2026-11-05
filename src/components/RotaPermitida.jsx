@@ -17,7 +17,7 @@ export default function RotaPermitida({ chave, children, redirecionar = false })
   if (!registro) return <TelaAcessoNegado tipo="sem_cadastro" />;
   if (!ativo) return <TelaAcessoNegado tipo="inativo" />;
 
-  if (!temAcesso(chave)) {
+  if (chave && !temAcesso(chave)) {
     if (redirecionar && primeiraRota) return <Navigate to={primeiraRota} replace />;
     return <TelaAcessoNegado tipo="sem_permissao" />;
   }

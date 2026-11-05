@@ -222,7 +222,7 @@ export default function ImportarXml() {
 
       {resultado ? <ResultadoImportacao resultado={resultado} /> : null}
 
-      <Link to="/" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+      <Link to="/difal" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
         Ir para a apuração
         <ArrowRight className="h-3.5 w-3.5" />
       </Link>

@@ -1,14 +1,15 @@
 // Usado pelo frontend e pelo servidor, para que as regras de acesso sejam as mesmas nos dois lados.
 
 export const PAGINAS = [
-  { chave: 'apuracao', rota: '/', label: 'Apuração' },
-  { chave: 'emissao_lote', rota: '/lote', label: 'Emissão em lote' },
-  { chave: 'cadastrar_nota', rota: '/notas/nova', label: 'Cadastrar nota' },
-  { chave: 'importar_xml', rota: '/importar', label: 'Importar XML' },
-  { chave: 'cnpjs', rota: '/cnpjs', label: 'CNPJs' },
-  { chave: 'consulta', rota: '/consulta', label: 'Consulta' },
-  { chave: 'consolidado', rota: '/consolidado', label: 'Consolidado' },
-  { chave: 'usuarios', rota: '/usuarios', label: 'Usuários' },
+  { chave: 'apuracao', rota: '/difal', label: 'Apuração', modulo: 'difal' },
+  { chave: 'emissao_lote', rota: '/difal/lote', label: 'Emissão em lote', modulo: 'difal' },
+  { chave: 'cadastrar_nota', rota: '/difal/notas/nova', label: 'Cadastrar nota', modulo: 'difal' },
+  { chave: 'importar_xml', rota: '/difal/importar', label: 'Importar XML', modulo: 'difal' },
+  { chave: 'cnpjs', rota: '/difal/cnpjs', label: 'CNPJs', modulo: 'difal' },
+  { chave: 'consulta', rota: '/difal/consulta', label: 'Consulta', modulo: 'difal' },
+  { chave: 'consolidado', rota: '/difal/consolidado', label: 'Consolidado', modulo: 'difal' },
+  // Administração do sistema (fora dos módulos), aberta pela página inicial.
+  { chave: 'usuarios', rota: '/usuarios', label: 'Usuários', modulo: null },
 ];
 
 const TODAS = PAGINAS.map((p) => p.chave);

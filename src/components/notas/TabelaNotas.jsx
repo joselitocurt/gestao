@@ -49,7 +49,7 @@ const Vazio = ({ filtrado, podeEditar }) => (
     </p>
     {!filtrado && podeEditar ? (
       <Button asChild className="mt-5">
-        <Link to="/importar">
+        <Link to="/difal/importar">
           <UploadCloud className="h-4 w-4" />
           Importar XML
         </Link>

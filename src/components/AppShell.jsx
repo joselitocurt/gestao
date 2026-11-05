@@ -12,7 +12,7 @@ import {
   Search,
   Sun,
   UploadCloud,
-  Users,
+  LayoutGrid,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useAcesso } from '@/lib/AcessoContext';
@@ -20,35 +20,35 @@ import { useAuth } from '@/lib/AuthContext';
 import { rotuloPerfil } from '@/lib/permissoes';
 import { useTema } from '@/lib/tema';
 import { cn } from '@/lib/utils';
+import { MODULOS } from '@/lib/modulos';
 
 const GRUPOS = [
   {
     titulo: 'Apuração',
     itens: [
-      { to: '/', label: 'Notas do período', icon: LayoutList, chave: 'apuracao', end: true },
-      { to: '/lote', label: 'Emissão em lote', icon: Layers, chave: 'emissao_lote' },
-      { to: '/consulta', label: 'Consultar nota', icon: Search, chave: 'consulta' },
-      { to: '/consolidado', label: 'Consolidado', icon: BarChart3, chave: 'consolidado' },
+      { to: '/difal', label: 'Notas do período', icon: LayoutList, chave: 'apuracao', end: true },
+      { to: '/difal/lote', label: 'Emissão em lote', icon: Layers, chave: 'emissao_lote' },
+      { to: '/difal/consulta', label: 'Consultar nota', icon: Search, chave: 'consulta' },
+      { to: '/difal/consolidado', label: 'Consolidado', icon: BarChart3, chave: 'consolidado' },
     ],
   },
   {
     titulo: 'Entrada de notas',
     itens: [
-      { to: '/importar', label: 'Importar XML', icon: UploadCloud, chave: 'importar_xml' },
-      { to: '/notas/nova', label: 'Cadastrar nota', icon: FilePlus2, chave: 'cadastrar_nota' },
+      { to: '/difal/importar', label: 'Importar XML', icon: UploadCloud, chave: 'importar_xml' },
+      { to: '/difal/notas/nova', label: 'Cadastrar nota', icon: FilePlus2, chave: 'cadastrar_nota' },
     ],
   },
   {
     titulo: 'Cadastros',
     itens: [
-      { to: '/cnpjs', label: 'CNPJs emissores', icon: Building2, chave: 'cnpjs' },
-      { to: '/usuarios', label: 'Usuários', icon: Users, chave: 'usuarios' },
+      { to: '/difal/cnpjs', label: 'CNPJs emissores', icon: Building2, chave: 'cnpjs' },
     ],
   },
 ];
 
 const Marca = ({ compacta = false }) => (
-  <Link to="/" className="block px-2" aria-label="Controlar.io, Gestão DIFAL: início">
+  <Link to="/" className="block px-2" aria-label="Controlar.io: voltar à escolha de módulos" title="Voltar à escolha de módulos">
     <img
       src="/marca/controlar-sem-assinatura-negativo.svg"
       alt="Controlar.io"
@@ -64,6 +64,31 @@ const Marca = ({ compacta = false }) => (
     )}
   </Link>
 );
+
+// Identifica o módulo aberto e leva de volta à escolha de módulos.
+const ModuloAtual = () => {
+  const modulo = MODULOS[0];
+  const Icone = modulo.icone;
+  return (
+    <div className="mx-3 mt-5 flex items-center gap-3 rounded-lg bg-sidebar-muted/60 px-3 py-2.5">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-sidebar text-sidebar-active">
+        <Icone className="h-4 w-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/70">Módulo {modulo.numero}</p>
+        <p className="truncate text-sm font-semibold text-white">{modulo.nome}</p>
+      </div>
+      <Link
+        to="/"
+        className="grid h-8 w-8 place-items-center rounded-md text-sidebar-foreground transition-colors hover:bg-sidebar hover:text-white"
+        aria-label="Todos os módulos"
+        title="Todos os módulos"
+      >
+        <LayoutGrid className="h-4 w-4" />
+      </Link>
+    </div>
+  );
+};
 
 function Navegacao({ onNavegar }) {
   const { temAcesso } = useAcesso();
@@ -175,6 +200,7 @@ export default function AppShell() {
         <div className="px-3 pt-5">
           <Marca />
         </div>
+        <ModuloAtual />
         <Navegacao />
         <Rodape />
       </aside>
@@ -198,6 +224,7 @@ export default function AppShell() {
           <div className="px-3 pt-5">
             <Marca />
           </div>
+          <ModuloAtual />
           <Navegacao onNavegar={() => setMenuAberto(false)} />
           <Rodape />
         </SheetContent>
