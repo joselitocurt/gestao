@@ -1,4 +1,4 @@
-import { STATUS, formatBRL, formatData, formatEmissao } from '@/lib/fiscal';
+import { STATUS, apenasDigitos, formatBRL, formatCpf, formatData, formatEmissao } from '@/lib/fiscal';
 import { carregarLogoPdf, desenharLogo } from '@/lib/logoPdf';
 
 // Relatório das notas de um lote (A4 paisagem).
@@ -18,6 +18,12 @@ const COLUNAS = [
   { chave: 'pagamento', titulo: 'PAGAMENTO', x: M + 722, w: 56 },
 ];
 
+// Chave de acesso em blocos de 4 dígitos, como no DANFE.
+const formatarChave = (chave) => {
+  const d = apenasDigitos(chave);
+  return d ? d.replace(/(\d{4})(?=\d)/g, '$1 ') : '—';
+};
+
 const cortar = (doc, texto, largura) => {
   let t = String(texto ?? '');
   if (!largura || doc.getTextWidth(t) <= largura) return t;
@@ -25,7 +31,7 @@ const cortar = (doc, texto, largura) => {
   return `${t}…`;
 };
 
-export async function baixarPdfLote({ notas, titulo, emissorDe, observacao }) {
+export async function baixarPdfLote({ notas, titulo, emissorDe, observacao, confirmacao }) {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'landscape' });
   const agora = new Date();
@@ -52,6 +58,10 @@ export async function baixarPdfLote({ notas, titulo, emissorDe, observacao }) {
   if (logo) desenharLogo(doc, logo, LARGURA - M - 130, 24, 130);
   texto('Gestão DIFAL', M, 40, { size: 9, negrito: true, cinza: true });
   texto(titulo, M, 62, { size: 16, negrito: true });
+  if (confirmacao) {
+    const quando = `${confirmacao.em.toLocaleDateString('pt-BR')} às ${confirmacao.em.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+    texto(`Lote confirmado em ${quando}${confirmacao.responsavel ? ` por ${confirmacao.responsavel}` : ''}`, M, 108, { size: 8, negrito: true });
+  }
   texto(
     `Gerado em ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
     LARGURA - M,
@@ -85,9 +95,9 @@ export async function baixarPdfLote({ notas, titulo, emissorDe, observacao }) {
     { size: 8, cinza: true },
   );
 
-  let y = cabecalhoTabela(120);
+  let y = cabecalhoTabela(confirmacao ? 132 : 120);
   notas.forEach((n) => {
-    if (y > 560) {
+    if (y > 548) {
       doc.addPage();
       y = cabecalhoTabela(48);
     }
@@ -110,10 +120,21 @@ export async function baixarPdfLote({ notas, titulo, emissorDe, observacao }) {
       doc.setFontSize(8);
       texto(cortar(doc, valores[c.chave], c.w), c.x, y, { negrito: c.chave === 'guia', alinhar: c.alinhar });
     });
-    y += 15;
+    // Segunda linha: chave de acesso e CPF do destinatário.
+    const linhaChave = `Chave de acesso: ${formatarChave(n.chave_acesso)}`;
+    texto(linhaChave, M, y + 11, { size: 7, cinza: true });
+    if (n.destinatario_cpf) {
+      doc.setFontSize(7);
+      const x = Math.max(M + 312, M + doc.getTextWidth(linhaChave) + 18);
+      texto(`CPF do destinatário: ${formatCpf(n.destinatario_cpf)}`, x, y + 11, { size: 7, cinza: true });
+    }
+    doc.setDrawColor(236, 239, 244);
+    doc.setLineWidth(0.4);
+    doc.line(M, y + 17, LARGURA - M, y + 17);
+    y += 29;
   });
 
-  linha(y - 8);
+  linha(y - 10);
   texto('Total', M, y + 4, { negrito: true });
   texto(formatBRL(soma.valor), M + 460, y + 4, { negrito: true, alinhar: 'right' });
   texto(formatBRL(soma.difal), M + 530, y + 4, { negrito: true, alinhar: 'right' });
@@ -127,5 +148,5 @@ export async function baixarPdfLote({ notas, titulo, emissorDe, observacao }) {
   }
 
   const data = agora.toISOString().slice(0, 10);
-  doc.save(`lote-${data}-${notas.length}-notas.pdf`);
+  doc.save(`${confirmacao ? 'lote-confirmado' : 'lote'}-${data}-${notas.length}-notas.pdf`);
 }

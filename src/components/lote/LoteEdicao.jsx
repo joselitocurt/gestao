@@ -13,7 +13,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { useAcesso } from '@/lib/AcessoContext';
 import StatusBadge from '@/components/notas/StatusBadge';
 import { formatBRL, formatEmissao } from '@/lib/fiscal';
 import { baixarPdfLote } from '@/lib/lotePdf';
@@ -64,6 +73,11 @@ export default function LoteEdicao({ notas, abaInicial = 'emitir', emissorDe, on
   const [salvando, setSalvando] = useState(false);
   const [sairSemSalvar, setSairSemSalvar] = useState(false);
   const [erro, setErro] = useState('');
+  // Último lote confirmado: { tipo, notas (como gravadas), em } — usado no relatório PDF.
+  const [concluido, setConcluido] = useState(null);
+  const [avisoConcluido, setAvisoConcluido] = useState(false);
+  const [gerandoPdf, setGerandoPdf] = useState(false);
+  const { registro, emailAtual } = useAcesso();
   const arquivoTodas = useRef(null);
 
   // Notas removidas do lote saem também do formulário.
@@ -156,10 +170,8 @@ export default function LoteEdicao({ notas, abaInicial = 'emitir', emissorDe, on
       const atualizados = valoresIniciais(salvas);
       setOriginais((o) => ({ ...o, ...atualizados }));
       setValores((v) => ({ ...v, ...atualizados }));
-      toast({
-        title: aba === 'emitir' ? `${salvas.length} guia(s) emitida(s)` : `${salvas.length} pagamento(s) baixado(s)`,
-        description: 'O status das notas foi atualizado.',
-      });
+      setConcluido({ tipo: aba, notas: salvas, em: new Date() });
+      setAvisoConcluido(true);
     } catch (e) {
       setErro(e.message || 'Não foi possível salvar o lote. Nada foi alterado; tente novamente.');
     } finally {
@@ -175,6 +187,32 @@ export default function LoteEdicao({ notas, abaInicial = 'emitir', emissorDe, on
       emissorDe,
       observacao: alteradas.length ? `(${alteradas.length} alteração(ões) ainda não confirmada(s))` : '',
     });
+
+  const baixarRelatorioConfirmado = async () => {
+    if (!concluido) return;
+    setGerandoPdf(true);
+    try {
+      await baixarPdfLote({
+        notas: concluido.notas,
+        titulo:
+          concluido.tipo === 'emitir'
+            ? 'Relatório do lote de emissão de guias DIFAL/FCOP'
+            : 'Relatório do lote de baixa de pagamentos DIFAL/FCOP',
+        emissorDe,
+        confirmacao: { em: concluido.em, responsavel: registro?.nome || emailAtual },
+      });
+    } catch {
+      toast({ variant: 'destructive', title: 'Não foi possível gerar o PDF', description: 'Tente novamente.' });
+    } finally {
+      setGerandoPdf(false);
+    }
+  };
+
+  const somaConcluido = (concluido?.notas || []).reduce(
+    (acc, n) => acc + (Number(n.valor_difal) || 0) + (Number(n.valor_fcop) || 0),
+    0,
+  );
+  const horaConcluido = concluido?.em.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
   const voltar = () => (alteradas.length ? setSairSemSalvar(true) : onVoltar());
 
@@ -202,6 +240,24 @@ export default function LoteEdicao({ notas, abaInicial = 'emitir', emissorDe, on
           Exportar PDF
         </Button>
       </div>
+
+      {concluido ? (
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-status-pago/30 bg-status-pago/5 px-4 py-3">
+          <p className="flex items-center gap-2 text-sm">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-status-pago" />
+            <span>
+              <span className="font-semibold">
+                {concluido.tipo === 'emitir' ? 'Emissão' : 'Baixa'} confirmada às {horaConcluido}
+              </span>
+              <span className="text-muted-foreground"> · {concluido.notas.length} nota(s), {formatBRL(somaConcluido)} em guias</span>
+            </span>
+          </p>
+          <Button size="sm" onClick={baixarRelatorioConfirmado} disabled={gerandoPdf} className="rounded-lg">
+            {gerandoPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+            Baixar relatório PDF
+          </Button>
+        </div>
+      ) : null}
 
       <div className="mt-5 inline-flex rounded-lg bg-muted p-1" role="tablist">
         {ABAS.map((a) => (
@@ -510,6 +566,35 @@ export default function LoteEdicao({ notas, abaInicial = 'emitir', emissorDe, on
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={avisoConcluido} onOpenChange={setAvisoConcluido}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <span className="mb-2 grid h-11 w-11 place-items-center rounded-full bg-status-pago/10 text-status-pago">
+              <CheckCircle2 className="h-6 w-6" />
+            </span>
+            <DialogTitle>
+              {concluido?.tipo === 'emitir'
+                ? `${concluido?.notas.length} guia(s) emitida(s)`
+                : `${concluido?.notas.length} pagamento(s) baixado(s)`}
+            </DialogTitle>
+            <DialogDescription>
+              O status das notas foi atualizado. Total das guias do lote:{' '}
+              <span className="font-semibold text-foreground">{formatBRL(somaConcluido)}</span>. Baixe o relatório com a listagem
+              das notas, os valores e a chave de acesso de cada uma.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setAvisoConcluido(false)}>
+              Fechar
+            </Button>
+            <Button onClick={baixarRelatorioConfirmado} disabled={gerandoPdf}>
+              {gerandoPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+              Baixar relatório PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={sairSemSalvar} onOpenChange={setSairSemSalvar}>
         <AlertDialogContent>
