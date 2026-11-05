@@ -16,7 +16,7 @@ const Vazio = ({ filtrado }) => (
     </span>
     <p className="mt-4 font-display text-lg">{filtrado ? 'Nenhuma nota com esses filtros' : 'Nenhuma nota cadastrada'}</p>
     <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-      {filtrado ? 'Volte algum filtro para "Todos" para ver mais notas.' : 'Importe os XMLs ou cadastre notas para montar um lote.'}
+      {filtrado ? 'Volte algum filtro para "Todos" para ver mais notas.' : 'Importe os XMLs ou cadastre notas para começar.'}
     </p>
   </div>
 );

@@ -4,6 +4,7 @@ import {
   BarChart3,
   Building2,
   FilePlus2,
+  FileSpreadsheet,
   Layers,
   LayoutList,
   LogOut,
@@ -29,7 +30,13 @@ const GRUPOS = [
       { to: '/difal', label: 'Notas do período', icon: LayoutList, chave: 'apuracao', end: true },
       { to: '/difal/lote', label: 'Emissão em lote', icon: Layers, chave: 'emissao_lote' },
       { to: '/difal/consulta', label: 'Consultar nota', icon: Search, chave: 'consulta' },
+    ],
+  },
+  {
+    titulo: 'Relatórios',
+    itens: [
       { to: '/difal/consolidado', label: 'Consolidado', icon: BarChart3, chave: 'consolidado' },
+      { to: '/difal/relatorio', label: 'Relatório de notas', icon: FileSpreadsheet, chave: 'relatorio_notas' },
     ],
   },
   {

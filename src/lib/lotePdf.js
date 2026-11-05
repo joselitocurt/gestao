@@ -28,7 +28,7 @@ const cortar = (doc, texto, largura) => {
   return `${t}…`;
 };
 
-export async function baixarPdfLote({ notas, titulo, emissorDe, observacao, confirmacao }) {
+export async function baixarPdfLote({ notas, titulo, emissorDe, observacao, confirmacao, nomeArquivo }) {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'landscape' });
   const agora = new Date();
@@ -145,5 +145,5 @@ export async function baixarPdfLote({ notas, titulo, emissorDe, observacao, conf
   }
 
   const data = agora.toISOString().slice(0, 10);
-  doc.save(`${confirmacao ? 'lote-confirmado' : 'lote'}-${data}-${notas.length}-notas.pdf`);
+  doc.save(nomeArquivo || `${confirmacao ? 'lote-confirmado' : 'lote'}-${data}-${notas.length}-notas.pdf`);
 }

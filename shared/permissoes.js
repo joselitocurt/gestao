@@ -8,6 +8,7 @@ export const PAGINAS = [
   { chave: 'cnpjs', rota: '/difal/cnpjs', label: 'CNPJs emissores', modulo: 'difal' },
   { chave: 'consulta', rota: '/difal/consulta', label: 'Consultar nota', modulo: 'difal' },
   { chave: 'consolidado', rota: '/difal/consolidado', label: 'Consolidado', modulo: 'difal' },
+  { chave: 'relatorio_notas', rota: '/difal/relatorio', label: 'Relatório de notas', modulo: 'difal' },
   // Administração do sistema (fora dos módulos), aberta pela página inicial.
   { chave: 'usuarios', rota: '/usuarios', label: 'Usuários', modulo: null },
 ];

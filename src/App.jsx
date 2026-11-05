@@ -21,6 +21,7 @@ import Consulta from '@/pages/Consulta';
 import Consolidado from '@/pages/Consolidado';
 import Usuarios from '@/pages/Usuarios';
 import EmissaoLote from '@/pages/EmissaoLote';
+import RelatorioNotas from '@/pages/RelatorioNotas';
 
 // Módulo I: Gestão DIFAL (rotas relativas a /difal)
 const ROTAS_DIFAL = [
@@ -31,6 +32,7 @@ const ROTAS_DIFAL = [
   { path: 'cnpjs', chave: 'cnpjs', elemento: <Cnpjs /> },
   { path: 'consulta', chave: 'consulta', elemento: <Consulta /> },
   { path: 'consolidado', chave: 'consolidado', elemento: <Consolidado /> },
+  { path: 'relatorio', chave: 'relatorio_notas', elemento: <RelatorioNotas /> },
 ];
 
 // Endereços antigos (antes dos módulos) continuam funcionando.

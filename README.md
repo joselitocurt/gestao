@@ -22,6 +22,7 @@ Endereços antigos (como `/consolidado`) redirecionam para o novo (`/difal/conso
 | **Importar XML** (`/difal/importar`) | Lê vários XMLs de NF-e de uma vez. Só aceita destinatário com CPF e UF de destino diferente da UF do emissor. Ignora duplicadas e cadastra CNPJs novos como filial. |
 | **CNPJs emissores** (`/difal/cnpjs`) | Cadastro da matriz e das filiais. |
 | **Consultar nota** (`/difal/consulta`) | Busca uma nota pelo CNPJ e pelo número, com acesso ao comprovante. |
+| **Relatório de notas** (`/difal/relatorio`) | Com os mesmos filtros da Emissão em lote, marca uma ou várias notas (ou todas as do filtro, até 2.000) e exporta em **PDF** ou **Excel (.xlsx)** com emissor, destinatário, CPF, UF, datas, valores, status e a **chave de acesso** (44 dígitos em sequência, gravada como texto no Excel). A planilha tem cabeçalho fixo, filtros e linha de totais. |
 | **Consolidado** (`/difal/consolidado`) | Painel com o total geral e filtros por CNPJ, ano, mês e UF de destino. Tem evolução mensal, rankings por UF e por CNPJ, gráfico UF × CNPJ e exportação em PDF e CSV (Excel). |
 
 ### Administração (`/usuarios`, só Master)
@@ -33,7 +34,7 @@ Endereços antigos (como `/consolidado`) redirecionam para o novo (`/difal/conso
 
 ## Interface
 
-- **Menu lateral** com as páginas agrupadas por tarefa (apuração, entrada de notas, cadastros). No celular, vira uma gaveta.
+- **Menu lateral** com as páginas agrupadas por tarefa (apuração, relatórios, entrada de notas, cadastros). No celular, vira uma gaveta.
 - **Tema claro e escuro**, com botão no rodapé do menu. Na primeira visita, segue o tema do sistema.
 - **Situação das guias:** na Apuração, a barra mostra quanto do período está pago, emitido ou a emitir. Clicar num segmento (ou na legenda) filtra a lista por esse status.
 - **Troca rápida de status:** o selo de status de cada nota abre um menu para mudar o status ali mesmo. Ao marcar "Pago", a data de pagamento é preenchida com o dia atual.
