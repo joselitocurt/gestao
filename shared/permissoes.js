@@ -6,6 +6,7 @@ export const PAGINAS = [
   { chave: 'cadastrar_nota', rota: '/difal/notas/nova', label: 'Cadastrar nota', modulo: 'difal' },
   { chave: 'importar_xml', rota: '/difal/importar', label: 'Importar XML', modulo: 'difal' },
   { chave: 'cnpjs', rota: '/difal/cnpjs', label: 'CNPJs emissores', modulo: 'difal' },
+  { chave: 'aliquotas', rota: '/difal/aliquotas', label: 'Alíquotas', modulo: 'difal' },
   { chave: 'consulta', rota: '/difal/consulta', label: 'Consultar nota', modulo: 'difal' },
   { chave: 'consolidado', rota: '/difal/consolidado', label: 'Consolidado', modulo: 'difal' },
   { chave: 'relatorio_notas', rota: '/difal/relatorio', label: 'Relatório de notas', modulo: 'difal' },

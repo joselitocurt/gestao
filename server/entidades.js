@@ -25,7 +25,17 @@ export const ENTIDADES = {
       data_pagamento: 'date',
       comprovante_uri: 'string',
       comprovante_nome: 'string',
+      // Parâmetros do cálculo informados na nota
+      importada: 'boolean',
+      sem_fcp: 'boolean',
+      // Cálculo automático do DIFAL por fora (preenchido pelo servidor)
+      difal_calculado: 'number',
+      fcop_calculado: 'number',
+      aliq_interestadual: 'number',
+      aliq_interna: 'number',
+      aliq_fcp: 'number',
     },
+    somenteServidor: ['difal_calculado', 'fcop_calculado', 'aliq_interestadual', 'aliq_interna', 'aliq_fcp'],
     obrigatorios: ['numero', 'emitente_cnpj'],
     enums: { status: ['a_emitir', 'emitido', 'pago'] },
     padroes: { valor_difal: 0, valor_fcop: 0, status: 'a_emitir' },
@@ -43,6 +53,20 @@ export const ENTIDADES = {
     obrigatorios: ['cnpj', 'uf'],
     enums: { tipo: ['matriz', 'filial'] },
     padroes: { tipo: 'filial' },
+  },
+
+  // Parâmetros do cálculo do DIFAL: alíquota interna e FCP de cada UF de destino (em %).
+  Aliquota: {
+    tabela: 'aliquota',
+    campos: {
+      uf: 'string',
+      nome: 'string',
+      regiao: 'string',
+      interna: 'number',
+      fcp: 'number',
+    },
+    obrigatorios: ['uf', 'interna', 'fcp'],
+    padroes: { fcp: 0 },
   },
 
   UsuarioSistema: {
@@ -120,7 +144,7 @@ export const prepararDados = (def, dados, { parcial = false } = {}) => {
   }
   const saida = {};
   for (const [campo, tipo] of Object.entries(def.campos)) {
-    if (!(campo in dados)) continue;
+    if (!(campo in dados) || def.somenteServidor?.includes(campo)) continue;
     let valor = paraBanco(tipo, dados[campo]);
     if (campo === 'email' && typeof valor === 'string') valor = valor.trim().toLowerCase();
     if (valor !== undefined) saida[campo] = valor;

@@ -2,7 +2,8 @@ import React from 'react';
 import { FileText } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import StatusBadge from '@/components/notas/StatusBadge';
-import { formatBRL, formatData, formatEmissao, totalGuia } from '@/lib/fiscal';
+import ValorGuia from '@/components/notas/ValorGuia';
+import { formatBRL, formatData, formatEmissao, valoresGuia } from '@/lib/fiscal';
 import { cn } from '@/lib/utils';
 
 // Classes escritas por extenso para o Tailwind encontrá-las.
@@ -97,10 +98,10 @@ export default function ListaSelecao({ notas, carregando, selecionadas, onAltern
 
                     <p className="numeros hidden text-[13px] text-muted-foreground lg:block">{formatEmissao(n)}</p>
                     <p className="numeros hidden text-right text-[13px] text-muted-foreground lg:block">{formatBRL(n.valor_total)}</p>
-                    <p className="numeros hidden text-right lg:block">{n.valor_difal ? formatBRL(n.valor_difal) : '—'}</p>
-                    <p className="numeros hidden text-right lg:block">{n.valor_fcop ? formatBRL(n.valor_fcop) : '—'}</p>
-                    <p className="numeros col-start-3 row-start-1 text-right font-semibold lg:col-start-auto lg:row-start-auto">
-                      {formatBRL(totalGuia(n))}
+                    <p className="numeros hidden text-right lg:block"><ValorGuia valor={valoresGuia(n).difal} calculado={valoresGuia(n).calculado} /></p>
+                    <p className="numeros hidden text-right lg:block"><ValorGuia valor={valoresGuia(n).fcop} calculado={valoresGuia(n).calculado} /></p>
+                    <p className="numeros col-start-3 row-start-1 text-right lg:col-start-auto lg:row-start-auto">
+                      <ValorGuia valor={valoresGuia(n).total} calculado={valoresGuia(n).calculado} forte vazio={formatBRL(0)} />
                     </p>
                     <div className="col-start-3 row-start-2 justify-self-end lg:col-start-auto lg:row-start-auto lg:justify-self-start">
                       <StatusBadge status={n.status} />

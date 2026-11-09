@@ -22,6 +22,7 @@ import Consolidado from '@/pages/Consolidado';
 import Usuarios from '@/pages/Usuarios';
 import EmissaoLote from '@/pages/EmissaoLote';
 import RelatorioNotas from '@/pages/RelatorioNotas';
+import Aliquotas from '@/pages/Aliquotas';
 
 // Módulo I: Gestão DIFAL (rotas relativas a /difal)
 const ROTAS_DIFAL = [
@@ -30,6 +31,7 @@ const ROTAS_DIFAL = [
   { path: 'importar', chave: 'importar_xml', elemento: <ImportarXml /> },
   { path: 'notas/nova', chave: 'cadastrar_nota', elemento: <CadastrarNota /> },
   { path: 'cnpjs', chave: 'cnpjs', elemento: <Cnpjs /> },
+  { path: 'aliquotas', chave: 'aliquotas', elemento: <Aliquotas /> },
   { path: 'consulta', chave: 'consulta', elemento: <Consulta /> },
   { path: 'consolidado', chave: 'consolidado', elemento: <Consolidado /> },
   { path: 'relatorio', chave: 'relatorio_notas', elemento: <RelatorioNotas /> },

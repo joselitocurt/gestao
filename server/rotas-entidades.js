@@ -6,6 +6,7 @@ import { ENTIDADES, ErroValidacao, camposConsultaveis, deBanco, prepararDados } 
 import { montarOrdem, montarWhere } from './consulta.js';
 import { permissoesEfetivas } from '../shared/permissoes.js';
 import { CAMPOS_DO_STATUS, statusAutomatico } from '../shared/status.js';
+import { CAMPOS_DO_CALCULO, camposCalculados, recalcularNotas } from './calculo.js';
 
 export const rotasEntidades = Router();
 rotasEntidades.use(autenticar);
@@ -26,6 +27,7 @@ const negar = (mensagem = 'Sem permissão para esta operação') => {
 // Páginas que permitem gravar cada entidade (mesmas telas que gravam no app original).
 const ESCRITA = {
   NotaFiscal: ['apuracao', 'cadastrar_nota', 'importar_xml', 'emissao_lote'],
+  Aliquota: ['aliquotas'],
   Emitente: ['cnpjs', 'importar_xml'],
 };
 
@@ -78,6 +80,7 @@ const combinar = (filtro, restricao) => (restricao ? { $and: [filtro || {}, rest
 
 const inserir = (def, dados, req) => {
   const data = agora();
+  if (def.tabela === 'nota_fiscal') dados = { ...dados, ...camposCalculados(dados) };
   const registro = { id: crypto.randomUUID(), ...dados, created_by: req.user.email, created_date: data, updated_date: data };
   const colunas = Object.keys(registro);
   db.prepare(
@@ -184,6 +187,11 @@ const atualizar = (def, entidade, id, corpo) => {
     dados.status = statusAutomatico({ ...existente, ...dados });
   }
 
+  // Mudou valor, UFs ou parâmetros da nota: refaz o cálculo do DIFAL.
+  if (entidade === 'NotaFiscal' && CAMPOS_DO_CALCULO.some((campo) => campo in dados)) {
+    Object.assign(dados, camposCalculados({ ...existente, ...dados }));
+  }
+
   const colunas = Object.keys(dados);
   if (colunas.length) {
     db.prepare(
@@ -215,6 +223,7 @@ rotasEntidades.put('/:entidade', (req, res) => {
       return registro;
     }),
   )();
+  if (req.params.entidade === 'Aliquota') recalcularNotas({ ufs: salvos.map((a) => a.uf) });
   res.json(salvos);
 });
 
@@ -223,6 +232,8 @@ rotasEntidades.put('/:entidade/:id', (req, res) => {
   verificarAcesso(req, req.params.entidade, 'escrita');
   const registro = atualizar(def, req.params.entidade, req.params.id, req.body);
   if (!registro) return res.status(404).json({ message: 'Registro não encontrado' });
+  // Alíquota alterada: recalcula as notas "A emitir" com destino nessa UF.
+  if (req.params.entidade === 'Aliquota') recalcularNotas({ ufs: [registro.uf] });
   res.json(registro);
 });
 

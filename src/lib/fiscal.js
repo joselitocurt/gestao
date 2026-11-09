@@ -55,6 +55,21 @@ export const formatEmissao = (nota) => {
 
 export const totalGuia = (nota) => (Number(nota?.valor_difal) || 0) + (Number(nota?.valor_fcop) || 0);
 
+/**
+ * Valores da guia para exibir: os lançados (guia emitida) ou, se a nota ainda não tem
+ * DIFAL nem FCOP, os calculados automaticamente pelas alíquotas (marcados como calculado).
+ */
+export const valoresGuia = (nota) => {
+  const difal = Number(nota?.valor_difal) || 0;
+  const fcop = Number(nota?.valor_fcop) || 0;
+  if (difal || fcop || nota?.difal_calculado === null || nota?.difal_calculado === undefined) {
+    return { difal, fcop, total: difal + fcop, calculado: false };
+  }
+  const dc = Number(nota.difal_calculado) || 0;
+  const fc = Number(nota.fcop_calculado) || 0;
+  return { difal: dc, fcop: fc, total: Math.round((dc + fc) * 100) / 100, calculado: dc + fc > 0 };
+};
+
 export const nomeEmitente = (emitente) =>
   emitente?.apelido || emitente?.razao_social || formatCnpj(emitente?.cnpj) || 'Sem nome';
 

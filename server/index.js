@@ -3,6 +3,7 @@ import path from 'node:path';
 import express from 'express';
 import { IS_PROD, PORT, ROOT_DIR } from './config.js';
 import { abrirBanco, db } from './db.js';
+import { recalcularNotas } from './calculo.js';
 import { criarUsuario } from './auth.js';
 import { rotasAuth, rotasUsuarios } from './auth.js';
 import { rotasEntidades } from './rotas-entidades.js';
@@ -26,7 +27,10 @@ const criarAdministradorInicial = () => {
 
 // O banco abre de forma assíncrona (WebAssembly). O servidor começa a escutar na hora,
 // e as requisições à API esperam o banco ficar pronto.
-const bancoPronto = abrirBanco().then(criarAdministradorInicial);
+const bancoPronto = abrirBanco()
+  .then(criarAdministradorInicial)
+  // Notas gravadas antes do cálculo automático recebem os valores calculados.
+  .then(() => recalcularNotas({ semCalculo: true }));
 bancoPronto.catch((erro) => console.error('Falha ao abrir o banco de dados:', erro));
 
 const app = express();

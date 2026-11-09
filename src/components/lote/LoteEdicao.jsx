@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ArrowLeft, CalendarCheck, CheckCircle2, FileDown, Loader2, Paperclip, Upload, X } from 'lucide-react';
+import { ArrowLeft, Calculator, CalendarCheck, CheckCircle2, FileDown, Loader2, Paperclip, Upload, X } from 'lucide-react';
 import { api } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,6 +47,27 @@ const valoresIniciais = (notas) =>
     ]),
   );
 
+// Notas sem DIFAL nem FCOP recebem os valores calculados pelas alíquotas (podem ser ajustados).
+const comCalculo = (notas, valores) =>
+  Object.fromEntries(
+    Object.entries(valores).map(([id, v]) => {
+      const n = notas.find((x) => x.id === id);
+      const vazio = !Number(v.valor_difal) && !Number(v.valor_fcop);
+      if (!n || !vazio || !(Number(n.difal_calculado) || Number(n.fcop_calculado))) return [id, v];
+      return [
+        id,
+        {
+          ...v,
+          valor_difal: n.difal_calculado ? String(n.difal_calculado) : '',
+          valor_fcop: n.fcop_calculado ? String(n.fcop_calculado) : '',
+        },
+      ];
+    }),
+  );
+
+const contarCalculadas = (notas) =>
+  notas.filter((n) => !Number(n.valor_difal) && !Number(n.valor_fcop) && (Number(n.difal_calculado) || Number(n.fcop_calculado))).length;
+
 const ABAS = [
   { chave: 'emitir', rotulo: 'Emitir guias', descricao: 'Lance DIFAL e FCOP de cada nota. Com valor, a nota fica Emitida.' },
   {
@@ -65,7 +86,10 @@ const entrada = 'numeros h-9 rounded-lg border-border bg-background text-right t
 export default function LoteEdicao({ notas, abaInicial = 'emitir', emissorDe, onVoltar, onRemover, onSalvo }) {
   const { toast } = useToast();
   const [aba, setAba] = useState(abaInicial);
-  const [valores, setValores] = useState(() => valoresIniciais(notas));
+  const [valores, setValores] = useState(() =>
+    abaInicial === 'emitir' ? comCalculo(notas, valoresIniciais(notas)) : valoresIniciais(notas),
+  );
+  const [preenchidas, setPreenchidas] = useState(() => (abaInicial === 'emitir' ? contarCalculadas(notas) : 0));
   const [originais, setOriginais] = useState(() => valoresIniciais(notas));
   const [dataTodas, setDataTodas] = useState(hoje());
   const [enviandoArquivo, setEnviandoArquivo] = useState(null); // id da nota ou 'todas'
@@ -276,6 +300,27 @@ export default function LoteEdicao({ notas, abaInicial = 'emitir', emissorDe, on
           </button>
         ))}
       </div>
+
+      {aba === 'emitir' ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-accent px-4 py-2.5 text-sm text-accent-foreground">
+          <span className="flex items-center gap-2">
+            <Calculator className="h-4 w-4 shrink-0" />
+            {preenchidas
+              ? `${preenchidas} nota(s) preenchida(s) com DIFAL e FCOP calculados pelas alíquotas. Revise antes de confirmar.`
+              : 'DIFAL e FCOP são calculados pelas alíquotas cadastradas (cálculo por fora).'}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setValores((v) => comCalculo(lista, v));
+              setPreenchidas(contarCalculadas(lista));
+            }}
+            className="font-semibold underline-offset-2 hover:underline"
+          >
+            Preencher as vazias com o cálculo
+          </button>
+        </div>
+      ) : null}
 
       {aba === 'pagar' ? (
         <div className="painel mt-4 flex flex-wrap items-end gap-x-6 gap-y-3 p-4">

@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import initSqlJs from 'sql.js';
 import { DB_PATH } from './config.js';
+import { ALIQUOTAS_PADRAO } from '../shared/difal.js';
 
 const ESQUEMA = `
   CREATE TABLE IF NOT EXISTS users (
@@ -77,6 +78,18 @@ const ESQUEMA = `
     updated_date TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_usuario_email ON usuario_sistema (email);
+
+  CREATE TABLE IF NOT EXISTS aliquota (
+    id TEXT PRIMARY KEY,
+    uf TEXT NOT NULL UNIQUE,
+    nome TEXT,
+    regiao TEXT,
+    interna REAL NOT NULL,
+    fcp REAL NOT NULL DEFAULT 0,
+    created_by TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL
+  );
 
   CREATE TABLE IF NOT EXISTS arquivo (
     id TEXT PRIMARY KEY,
@@ -234,9 +247,34 @@ export async function abrirBanco() {
     // Usuário antigo sem páginas gravadas usava o padrão do perfil: grava essas páginas explicitamente.
     banco.exec(`UPDATE usuario_sistema SET permissoes = '["apuracao","emissao_lote","cadastrar_nota","importar_xml","cnpjs","consulta","consolidado"]'
                 WHERE perfil = 'usuario' AND (permissoes IS NULL OR permissoes = '')`);
+    migrarCalculoDifal();
     salvar();
   });
   return db;
+}
+
+// Colunas do cálculo do DIFAL em bancos criados antes dele, e alíquotas padrão das 27 UFs.
+const COLUNAS_CALCULO = {
+  importada: 'INTEGER DEFAULT 0',
+  sem_fcp: 'INTEGER DEFAULT 0',
+  difal_calculado: 'REAL',
+  fcop_calculado: 'REAL',
+  aliq_interestadual: 'REAL',
+  aliq_interna: 'REAL',
+  aliq_fcp: 'REAL',
+};
+function migrarCalculoDifal() {
+  const existentes = new Set((banco.exec('PRAGMA table_info(nota_fiscal)')[0]?.values || []).map((linha) => linha[1]));
+  for (const [coluna, tipo] of Object.entries(COLUNAS_CALCULO)) {
+    if (!existentes.has(coluna)) banco.exec(`ALTER TABLE nota_fiscal ADD COLUMN ${coluna} ${tipo}`);
+  }
+  const data = new Date().toISOString();
+  const inserir = banco.prepare(
+    `INSERT OR IGNORE INTO aliquota (id, uf, nome, regiao, interna, fcp, created_by, created_date, updated_date)
+     VALUES (?, ?, ?, ?, ?, ?, 'sistema', ?, ?)`,
+  );
+  for (const a of ALIQUOTAS_PADRAO) inserir.run([`aliq-${a.uf}`, a.uf, a.nome, a.regiao, a.interna, a.fcp, data, data]);
+  inserir.free();
 }
 
 export const agora = () => new Date().toISOString();

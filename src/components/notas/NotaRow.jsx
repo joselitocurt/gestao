@@ -1,13 +1,15 @@
 import React from 'react';
 import StatusBadge from '@/components/notas/StatusBadge';
 import AcoesNota from '@/components/notas/AcoesNota';
-import { formatBRL, formatCpf, formatData, formatEmissao, nomeEmitente, totalGuia } from '@/lib/fiscal';
+import ValorGuia from '@/components/notas/ValorGuia';
+import { formatBRL, formatCpf, formatData, formatEmissao, nomeEmitente, valoresGuia } from '@/lib/fiscal';
 
 export const COLUNAS = 'grid-cols-[104px_minmax(0,1fr)_82px_96px_86px_76px_94px_112px_82px_72px]';
 
 const Vazio = () => <span className="text-muted-foreground/60">—</span>;
 
 export default function NotaRow({ nota, onSelect, onEdit, onDelete, onStatus, podeEditar, emitenteDe }) {
+  const g = valoresGuia(nota);
   const emissor = emitenteDe ? nomeEmitente(emitenteDe(nota.emitente_cnpj) || { cnpj: nota.emitente_cnpj }) : null;
   return (
     <div
@@ -42,9 +44,9 @@ export default function NotaRow({ nota, onSelect, onEdit, onDelete, onStatus, po
 
       <p className="numeros text-[13px] text-muted-foreground">{formatEmissao(nota)}</p>
       <p className="numeros text-right text-[13px] text-muted-foreground">{formatBRL(nota.valor_total)}</p>
-      <p className="numeros text-right">{nota.valor_difal ? formatBRL(nota.valor_difal) : <Vazio />}</p>
-      <p className="numeros text-right">{nota.valor_fcop ? formatBRL(nota.valor_fcop) : <Vazio />}</p>
-      <p className="numeros text-right font-semibold">{formatBRL(totalGuia(nota))}</p>
+      <p className="numeros text-right"><ValorGuia valor={g.difal} calculado={g.calculado} /></p>
+      <p className="numeros text-right"><ValorGuia valor={g.fcop} calculado={g.calculado} /></p>
+      <p className="numeros text-right"><ValorGuia valor={g.total} calculado={g.calculado} forte vazio={formatBRL(0)} /></p>
 
       <div>
         <StatusBadge status={nota.status} onChange={podeEditar ? (s) => onStatus(nota, s) : undefined} />

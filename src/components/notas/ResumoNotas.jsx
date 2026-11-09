@@ -15,9 +15,13 @@ const resumir = (resumo) => {
   const porStatus = Object.fromEntries(ORDEM.map((s) => [s, { notas: 0, valor: 0 }]));
   let difal = 0;
   let fcop = 0;
+  let calculado = 0;
   for (const r of resumo || []) {
-    const d = Number(r.sum_valor_difal) || 0;
-    const f = Number(r.sum_valor_fcop) || 0;
+    // Notas "A emitir" ainda não têm guia: entram com o valor calculado pelas alíquotas.
+    const pendente = r.status === 'a_emitir';
+    const d = Number(pendente ? r.sum_difal_calculado : r.sum_valor_difal) || 0;
+    const f = Number(pendente ? r.sum_fcop_calculado : r.sum_valor_fcop) || 0;
+    if (pendente) calculado += d + f;
     difal += d;
     fcop += f;
     const alvo = porStatus[r.status] || porStatus.a_emitir;
@@ -25,7 +29,7 @@ const resumir = (resumo) => {
     alvo.valor += d + f;
   }
   const notas = ORDEM.reduce((acc, s) => acc + porStatus[s].notas, 0);
-  return { porStatus, difal, fcop, total: difal + fcop, notas };
+  return { porStatus, difal, fcop, total: difal + fcop, notas, calculado };
 };
 
 /**
@@ -50,6 +54,11 @@ export default function ResumoNotas({ resumo, statusAtivo, onStatus }) {
             <span className="mx-2 text-border">/</span>
             FCOP <span className="font-semibold text-foreground">{formatBRL(t.fcop)}</span>
           </p>
+          {t.calculado > 0 ? (
+            <p className="numeros mt-1 text-xs text-muted-foreground">
+              Inclui <span className="italic">{formatBRL(t.calculado)}</span> calculados pelas alíquotas para as notas a emitir
+            </p>
+          ) : null}
         </div>
 
         <div className="sm:text-right">
@@ -115,9 +124,12 @@ export default function ResumoNotas({ resumo, statusAtivo, onStatus }) {
                 <span className="block text-sm font-semibold">{STATUS[status].label}</span>
                 <span className="numeros block text-xs text-muted-foreground">
                   {item.notas} {item.notas === 1 ? 'nota' : 'notas'}
+                  {status === 'a_emitir' && item.valor > 0 ? ' · calculado' : ''}
                 </span>
               </span>
-              <span className="numeros text-sm font-semibold">{formatBRL(item.valor)}</span>
+              <span className={cn('numeros text-sm font-semibold', status === 'a_emitir' && item.valor > 0 && 'italic')}>
+                {formatBRL(item.valor)}
+              </span>
               {ativo ? <X className="h-3.5 w-3.5 text-muted-foreground" aria-label="Remover filtro" /> : null}
             </button>
           );

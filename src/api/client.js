@@ -96,6 +96,7 @@ export const api = {
   entities: {
     NotaFiscal: entidade('NotaFiscal'),
     Emitente: entidade('Emitente'),
+    Aliquota: entidade('Aliquota'),
     UsuarioSistema: entidade('UsuarioSistema'),
   },
 

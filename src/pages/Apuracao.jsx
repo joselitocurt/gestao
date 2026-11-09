@@ -73,7 +73,7 @@ export default function Apuracao() {
     try {
       const [lista, agregado] = await Promise.all([
         api.entities.NotaFiscal.filter(filtroLista, { sort: '-data_emissao', limit: POR_PAGINA }),
-        api.entities.NotaFiscal.aggregate({ query: base, groupBy: 'status', sum: ['valor_difal', 'valor_fcop'] }),
+        api.entities.NotaFiscal.aggregate({ query: base, groupBy: 'status', sum: ['valor_difal', 'valor_fcop', 'difal_calculado', 'fcop_calculado'] }),
       ]);
       setNotas(lista.items || []);
       setCursor(lista.has_more ? lista.next_cursor : null);
@@ -209,6 +209,7 @@ export default function Apuracao() {
 
       <NotaDetalheSheet
         nota={selecionada}
+        ufEmitente={emitentes.find((e) => e.cnpj === selecionada?.emitente_cnpj)?.uf}
         somenteLeitura={!podeEditar}
         onClose={() => setSelecionada(null)}
         onSaved={() => {

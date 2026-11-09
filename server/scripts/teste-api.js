@@ -176,6 +176,41 @@ try {
   const usuariosNegado = await pedir('/entities/UsuarioSistema', { metodo: 'POST', token: tokenUsuario, corpo: { nome: 'x', email: 'y@x.com', perfil: 'master' } });
   conferir(usuariosNegado.status === 403, 'administração de usuários é exclusiva do Master');
 
+  // ------------------------------------------------ cálculo automático do DIFAL (por fora)
+  const aliqs = await pedir('/entities/Aliquota?limit=100', { token });
+  conferir(aliqs.dados?.items?.length === 27, 'alíquotas padrão das 27 UFs cadastradas');
+  const ba = aliqs.dados.items.find((a) => a.uf === 'BA');
+  const calc = await pedir('/entities/NotaFiscal', {
+    metodo: 'POST',
+    token,
+    corpo: { numero: '500', emitente_cnpj: '11222333000181', emitente_uf: 'SP', destinatario_uf: 'BA', valor_total: 1000, difal_calculado: 999 },
+  });
+  // SP → BA: interestadual 7%, interna 20,5% → DIFAL 135,00; FCP 2% → 20,00
+  conferir(
+    calc.dados?.difal_calculado === 135 && calc.dados?.fcop_calculado === 20 && calc.dados?.aliq_interestadual === 7 && calc.dados?.status === 'a_emitir',
+    'nota calculada pelo servidor (SP → BA: DIFAL 135,00 e FCP 20,00), sem mudar o status',
+  );
+  const importada = await pedir(`/entities/NotaFiscal/${calc.dados.id}`, { metodo: 'PUT', token, corpo: { importada: true, sem_fcp: true } });
+  conferir(importada.dados?.difal_calculado === 165 && importada.dados?.fcop_calculado === 0, 'importada (4%) e sem FCP recalculam a nota');
+  const emitida = await pedir('/entities/NotaFiscal', {
+    metodo: 'POST',
+    token,
+    corpo: { numero: '501', emitente_cnpj: '11222333000181', emitente_uf: 'SP', destinatario_uf: 'BA', valor_total: 1000, valor_difal: 135, valor_fcop: 20 },
+  });
+  await pedir(`/entities/Aliquota/${ba.id}`, { metodo: 'PUT', token, corpo: { interna: 21, fcp: 1 } });
+  const aposA = await pedir(`/entities/NotaFiscal/${calc.dados.id}`, { token });
+  const aposE = await pedir(`/entities/NotaFiscal/${emitida.dados.id}`, { token });
+  conferir(
+    aposA.dados?.difal_calculado === 170 && aposE.dados?.difal_calculado === 135,
+    'alterar a alíquota recalcula só as notas a emitir',
+  );
+  const mesmaUf = await pedir('/entities/NotaFiscal', {
+    metodo: 'POST',
+    token,
+    corpo: { numero: '502', emitente_cnpj: '11222333000181', emitente_uf: 'BA', destinatario_uf: 'BA', valor_total: 1000 },
+  });
+  conferir(mesmaUf.dados?.difal_calculado === 0, 'operação na mesma UF não gera DIFAL');
+
   const semAdmin = await pedir('/entities/UsuarioSistema', { metodo: 'POST', corpo: { nome: 'x', email: 'x@x.com', perfil: 'master' } });
   conferir(semAdmin.status === 401, 'gestão de usuários exige login');
 } catch (erro) {

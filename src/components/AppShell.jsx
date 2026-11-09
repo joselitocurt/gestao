@@ -10,6 +10,7 @@ import {
   LogOut,
   Menu,
   Moon,
+  Percent,
   Search,
   Sun,
   UploadCloud,
@@ -50,6 +51,7 @@ const GRUPOS = [
     titulo: 'Cadastros',
     itens: [
       { to: '/difal/cnpjs', label: 'CNPJs emissores', icon: Building2, chave: 'cnpjs' },
+      { to: '/difal/aliquotas', label: 'Alíquotas', icon: Percent, chave: 'aliquotas' },
     ],
   },
 ];

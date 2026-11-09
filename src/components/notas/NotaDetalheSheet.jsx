@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/api/client';
 import StatusBadge from '@/components/notas/StatusBadge';
+import CalculoDifal from '@/components/notas/CalculoDifal';
+import { calcularNota, carregarAliquotas } from '@/lib/aliquotas';
 import { CAMPOS_DO_STATUS, statusAutomatico } from '@shared/status.js';
 import { STATUS_OPTIONS, formatBRL, formatCpf, formatEmissao } from '@/lib/fiscal';
 
@@ -17,15 +19,22 @@ const INICIAL = {
   data_pagamento: '',
   comprovante_uri: '',
   comprovante_nome: '',
+  importada: false,
+  sem_fcp: false,
 };
 
 const numero = (v) => Number(v) || 0;
 
-export default function NotaDetalheSheet({ nota, onClose, onSaved, somenteLeitura = false }) {
+export default function NotaDetalheSheet({ nota, ufEmitente, onClose, onSaved, somenteLeitura = false }) {
+  const [aliquotas, setAliquotas] = useState(null);
   const [form, setForm] = useState(INICIAL);
   const [salvando, setSalvando] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    if (nota && !aliquotas) carregarAliquotas().then(setAliquotas).catch(() => setAliquotas({}));
+  }, [nota, aliquotas]);
 
   useEffect(() => {
     if (!nota) return;
@@ -37,8 +46,19 @@ export default function NotaDetalheSheet({ nota, onClose, onSaved, somenteLeitur
       data_pagamento: nota.data_pagamento ? String(nota.data_pagamento).slice(0, 10) : '',
       comprovante_uri: nota.comprovante_uri || '',
       comprovante_nome: nota.comprovante_nome || '',
+      importada: Boolean(nota.importada),
+      sem_fcp: Boolean(nota.sem_fcp),
     });
   }, [nota]);
+
+  // Cálculo com as alíquotas atuais e os parâmetros marcados na tela.
+  const calculo = nota && aliquotas ? calcularNota({ ...nota, importada: form.importada, sem_fcp: form.sem_fcp }, aliquotas, ufEmitente) : null;
+  const aplicado =
+    calculo?.calculado && numero(form.valor_difal) === calculo.difal && numero(form.valor_fcop) === calculo.fcp;
+  const aplicarCalculo = () => {
+    alterar('valor_difal', calculo.difal ? String(calculo.difal) : '');
+    alterar('valor_fcop', calculo.fcp ? String(calculo.fcp) : '');
+  };
 
   // Valores e data de pagamento definem o status: DIFAL/FCOP lançado → Emitida; data de pagamento → Pago.
   const alterar = (campo, valor) =>
@@ -97,6 +117,8 @@ export default function NotaDetalheSheet({ nota, onClose, onSaved, somenteLeitur
         data_pagamento: form.data_pagamento || null,
         comprovante_uri: form.comprovante_uri || '',
         comprovante_nome: form.comprovante_nome || '',
+        importada: form.importada,
+        sem_fcp: form.sem_fcp,
       });
       onSaved?.();
     } catch (e) {
@@ -164,6 +186,18 @@ export default function NotaDetalheSheet({ nota, onClose, onSaved, somenteLeitur
                   Seu perfil permite apenas visualizar esta nota.
                 </p>
               ) : null}
+              <CalculoDifal
+                calculo={calculo}
+                origem={nota.emitente_uf || ufEmitente}
+                destino={nota.destinatario_uf}
+                importada={form.importada}
+                semFcp={form.sem_fcp}
+                onParametro={(campo, valor) => setForm((atual) => ({ ...atual, [campo]: valor }))}
+                onAplicar={aplicarCalculo}
+                aplicado={aplicado}
+                desabilitado={somenteLeitura}
+              />
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="valor_difal" className="text-xs text-muted-foreground">

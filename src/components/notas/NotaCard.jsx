@@ -1,7 +1,8 @@
 import React from 'react';
 import StatusBadge from '@/components/notas/StatusBadge';
 import AcoesNota from '@/components/notas/AcoesNota';
-import { formatBRL, formatCpf, formatData, formatEmissao, nomeEmitente, totalGuia } from '@/lib/fiscal';
+import ValorGuia from '@/components/notas/ValorGuia';
+import { formatCpf, formatData, formatEmissao, nomeEmitente, valoresGuia } from '@/lib/fiscal';
 
 const Valor = ({ label, children, forte }) => (
   <div>
@@ -11,6 +12,7 @@ const Valor = ({ label, children, forte }) => (
 );
 
 export default function NotaCard({ nota, onSelect, onEdit, onDelete, onStatus, podeEditar, emitenteDe }) {
+  const g = valoresGuia(nota);
   const emissor = emitenteDe ? nomeEmitente(emitenteDe(nota.emitente_cnpj) || { cnpj: nota.emitente_cnpj }) : null;
   return (
     <div
@@ -38,10 +40,10 @@ export default function NotaCard({ nota, onSelect, onEdit, onDelete, onStatus, p
       </div>
 
       <div className="mt-3 grid grid-cols-4 gap-2 text-[13px]">
-        <Valor label="DIFAL">{nota.valor_difal ? formatBRL(nota.valor_difal) : '—'}</Valor>
-        <Valor label="FCOP">{nota.valor_fcop ? formatBRL(nota.valor_fcop) : '—'}</Valor>
-        <Valor label="Total" forte>
-          {formatBRL(totalGuia(nota))}
+        <Valor label="DIFAL"><ValorGuia valor={g.difal} calculado={g.calculado} /></Valor>
+        <Valor label="FCOP"><ValorGuia valor={g.fcop} calculado={g.calculado} /></Valor>
+        <Valor label={g.calculado ? 'Total calc.' : 'Total'} forte>
+          <ValorGuia valor={g.total} calculado={g.calculado} forte />
         </Valor>
         <Valor label="Pago em">{nota.data_pagamento ? formatData(nota.data_pagamento) : '—'}</Valor>
       </div>
