@@ -168,11 +168,13 @@ export async function pdfFormulario({ punicao: p, colaborador, empresa, punicoes
   const motivo = nomeMotivo(p.motivo_id);
   const dataOc = fmt(p.data);
   const cy = cicloDa(punicoes, p);
+  // Medidas do ciclo até esta (inclusive), em ordem cronológica.
   const anteriores = cy
     ? cy.punicoes.filter(
         (x) => x.id !== p.id && (x.data < p.data || (x.data === p.data && (x.created_date || '') < (p.created_date || ''))),
       )
     : [];
+  const historico = [...anteriores, p];
   const testemunhas = (p.testemunhas || '')
     .split(/\s*[,;/]\s*|\s+e\s+/)
     .map((s) => s.trim())
@@ -276,38 +278,52 @@ export async function pdfFormulario({ punicao: p, colaborador, empresa, punicoes
     caixa('Descrição do ocorrido', p.descricao);
     if (p.justificativa_nivel) caixa('Justificativa da medida', p.justificativa_nivel);
 
+    // Histórico do motivo no ciclo vigente: todas as medidas do ciclo até esta, inclusive ela (em destaque).
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9.5);
     doc.setTextColor(...MARINHO);
-    doc.text('HISTÓRICO NESTE MOTIVO (CICLO VIGENTE)', M, y + 4);
-    if (anteriores.length) {
-      autoTable(doc, {
-        startY: y + 6,
-        margin: { left: M, right: M },
-        theme: 'grid',
-        head: [['Data', 'Referência', 'Medida']],
-        body: anteriores.map((x) => [
-          fmt(x.data),
-          x.referencia || '',
-          NIVEIS[Number(x.nivel)].nome + (Number(x.nivel) === 5 && x.dias_suspensao ? ` (${x.dias_suspensao} dias)` : ''),
-        ]),
-        headStyles: { fillColor: [244, 245, 247], textColor: 20, fontStyle: 'bold' },
-        styles: { fontSize: 8.5, cellPadding: 1.5, lineColor: LINHA, lineWidth: 0.2, textColor: 20 },
-      });
-      y = doc.lastAutoTable.finalY + 4;
-    } else {
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(20);
-      doc.text('Primeira ocorrência deste motivo no ciclo.', M, y + 10);
-      y += 14;
-    }
+    doc.text('HISTÓRICO DO MOTIVO NO CICLO VIGENTE', M, y + 4);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.3);
+    doc.setTextColor(...CINZA);
+    doc.text(
+      cy ? `Ciclo ${fmt(cy.inicio)} a ${fmt(cy.fim)} · em destaque: esta medida` : 'Primeira ocorrência: inicia um novo ciclo',
+      W - M,
+      y + 4,
+      { align: 'right' },
+    );
+    autoTable(doc, {
+      startY: y + 6,
+      margin: { left: M, right: M },
+      theme: 'grid',
+      head: [['Nº', 'Data', 'Referência', 'Medida', 'Descrição', 'Aplicada por']],
+      body: historico.map((x, i) => [
+        String(i + 1),
+        fmt(x.data),
+        x.referencia || '',
+        NIVEIS[Number(x.nivel)].nome + (Number(x.nivel) === 5 && x.dias_suspensao ? ` (${x.dias_suspensao} dias)` : ''),
+        x.descricao || '',
+        x.aplicada_por || '',
+      ]),
+      headStyles: { fillColor: MARINHO, textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 8, cellPadding: 1.5, lineColor: LINHA, lineWidth: 0.2, textColor: 20, valign: 'top' },
+      columnStyles: { 0: { cellWidth: 8, halign: 'center' }, 1: { cellWidth: 19 }, 2: { cellWidth: 24 }, 3: { cellWidth: 33 }, 5: { cellWidth: 30 } },
+      didParseCell: (dado) => {
+        // A medida deste formulário fica destacada na última linha.
+        if (dado.section === 'body' && dado.row.index === historico.length - 1) {
+          dado.cell.styles.fontStyle = 'bold';
+          dado.cell.styles.fillColor = [251, 243, 222];
+        }
+      },
+    });
+    y = doc.lastAutoTable.finalY + 4;
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9.8);
     doc.setTextColor(20);
     const tl = doc.splitTextToSize(texto, CW);
-    if (y + tl.length * 4.6 + 78 > 285) {
+    // Texto, local/data e assinaturas ocupam ~72 mm: só quebra a página se não couberem.
+    if (y + tl.length * 4.6 + 72 > 287) {
       doc.addPage();
       y = 20;
     }
@@ -315,7 +331,7 @@ export async function pdfFormulario({ punicao: p, colaborador, empresa, punicoes
     doc.text(tl, M, y, { lineHeightFactor: 1.35 });
     y += tl.length * 4.6 + 6;
     doc.text(`${E.cidade || '______________________'}, ______ de ________________________ de ________.`, M, y);
-    y += 16;
+    y += 13;
 
     const assinatura = (x, yy, rotulo, nome, extra) => {
       doc.setDrawColor(60);
@@ -334,10 +350,10 @@ export async function pdfFormulario({ punicao: p, colaborador, empresa, punicoes
     const x2 = W - M - 78;
     assinatura(M, y, 'Colaborador(a) - ciente', c.nome, `Mat. ${c.matricula || ''}`);
     assinatura(x2, y, 'Gestor(a) responsável', p.aplicada_por, '');
-    y += 26;
+    y += 23;
     assinatura(M, y, 'Testemunha 1', testemunhas[0], 'CPF: ______________________');
     assinatura(x2, y, 'Testemunha 2', testemunhas[1], 'CPF: ______________________');
-    y += 19;
+    y += 17;
     doc.setFont('helvetica', 'italic');
     doc.setFontSize(7.8);
     doc.setTextColor(...CINZA);
