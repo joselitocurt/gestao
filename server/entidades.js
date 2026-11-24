@@ -69,6 +69,57 @@ export const ENTIDADES = {
     padroes: { fcp: 0 },
   },
 
+  // ---------------------------------------------- Módulo II: Gestão Disciplinar
+  Colaborador: {
+    tabela: 'colaborador',
+    campos: {
+      matricula: 'string',
+      nome: 'string',
+      cpf: 'string',
+      funcao: 'string',
+      departamento: 'string',
+      admissao: 'date',
+      status: 'string',
+    },
+    obrigatorios: ['matricula', 'nome'],
+    enums: { status: ['Ativo', 'Afastado', 'Demitido'] },
+    padroes: { status: 'Ativo' },
+  },
+
+  Motivo: {
+    tabela: 'motivo',
+    campos: { nome: 'string', descricao: 'string', ativo: 'boolean' },
+    obrigatorios: ['nome'],
+    padroes: { ativo: true },
+  },
+
+  Punicao: {
+    tabela: 'punicao',
+    campos: {
+      referencia: 'string',
+      colaborador_id: 'string',
+      motivo_id: 'string',
+      nivel: 'number',
+      data: 'date',
+      ciclo_inicio: 'date',
+      dias_suspensao: 'number',
+      descricao: 'string',
+      justificativa_nivel: 'string',
+      aplicada_por: 'string',
+      testemunhas: 'string',
+      anexo_uri: 'string',
+      anexo_nome: 'string',
+    },
+    obrigatorios: ['referencia', 'colaborador_id', 'motivo_id', 'nivel', 'data', 'descricao', 'aplicada_por'],
+  },
+
+  // Dados da empresa no cabeçalho dos formulários (um único registro).
+  Empresa: {
+    tabela: 'empresa',
+    campos: { nome: 'string', cnpj: 'string', cidade: 'string', endereco: 'string' },
+    obrigatorios: [],
+  },
+
   UsuarioSistema: {
     tabela: 'usuario_sistema',
     campos: {

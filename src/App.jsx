@@ -23,6 +23,14 @@ import Usuarios from '@/pages/Usuarios';
 import EmissaoLote from '@/pages/EmissaoLote';
 import RelatorioNotas from '@/pages/RelatorioNotas';
 import Aliquotas from '@/pages/Aliquotas';
+import { DisciplinarProvider } from '@/lib/disciplinar/DadosContext';
+import PainelDisciplinar from '@/pages/disciplinar/Painel';
+import RegistrarPunicao from '@/pages/disciplinar/Registrar';
+import ConsultaColaborador from '@/pages/disciplinar/Consulta';
+import Colaboradores from '@/pages/disciplinar/Colaboradores';
+import Motivos from '@/pages/disciplinar/Motivos';
+import EmpresaDisciplinar from '@/pages/disciplinar/Empresa';
+import ExportacoesDisciplinar from '@/pages/disciplinar/Exportacoes';
 
 // Módulo I: Gestão DIFAL (rotas relativas a /difal)
 const ROTAS_DIFAL = [
@@ -35,6 +43,17 @@ const ROTAS_DIFAL = [
   { path: 'consulta', chave: 'consulta', elemento: <Consulta /> },
   { path: 'consolidado', chave: 'consolidado', elemento: <Consolidado /> },
   { path: 'relatorio', chave: 'relatorio_notas', elemento: <RelatorioNotas /> },
+];
+
+// Módulo II: Gestão Disciplinar (rotas relativas a /disciplinar)
+const ROTAS_DISCIPLINAR = [
+  { path: '', chave: 'disc_painel', elemento: <PainelDisciplinar />, redirecionar: true },
+  { path: 'registrar', chave: 'disc_registro', elemento: <RegistrarPunicao /> },
+  { path: 'consulta', chave: 'disc_consulta', elemento: <ConsultaColaborador /> },
+  { path: 'colaboradores', chave: 'disc_colaboradores', elemento: <Colaboradores /> },
+  { path: 'motivos', chave: 'disc_motivos', elemento: <Motivos /> },
+  { path: 'empresa', chave: 'disc_empresa', elemento: <EmpresaDisciplinar /> },
+  { path: 'exportacoes', chave: 'disc_exportacoes', elemento: <ExportacoesDisciplinar /> },
 ];
 
 // Endereços antigos (antes dos módulos) continuam funcionando.
@@ -74,7 +93,29 @@ export default function App() {
                     index={!rota.path}
                     path={rota.path || undefined}
                     element={
-                      <RotaPermitida chave={rota.chave} redirecionar={rota.redirecionar}>
+                      <RotaPermitida chave={rota.chave} redirecionar={rota.redirecionar} modulo="difal">
+                        {rota.elemento}
+                      </RotaPermitida>
+                    }
+                  />
+                ))}
+              </Route>
+
+              <Route
+                path="/disciplinar"
+                element={
+                  <DisciplinarProvider>
+                    <AppShell />
+                  </DisciplinarProvider>
+                }
+              >
+                {ROTAS_DISCIPLINAR.map((rota) => (
+                  <Route
+                    key={rota.path || 'inicio'}
+                    index={!rota.path}
+                    path={rota.path || undefined}
+                    element={
+                      <RotaPermitida chave={rota.chave} redirecionar={rota.redirecionar} modulo="disciplinar">
                         {rota.elemento}
                       </RotaPermitida>
                     }

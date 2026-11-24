@@ -1,60 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import {
-  BarChart3,
-  Building2,
-  FilePlus2,
-  FileSpreadsheet,
-  Layers,
-  LayoutList,
-  LogOut,
-  Menu,
-  Moon,
-  Percent,
-  Search,
-  Sun,
-  UploadCloud,
-  LayoutGrid,
-} from 'lucide-react';
+import { LayoutGrid, LogOut, Menu, Moon, Sun } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useAcesso } from '@/lib/AcessoContext';
 import { useAuth } from '@/lib/AuthContext';
 import { rotuloPerfil } from '@/lib/permissoes';
 import { useTema } from '@/lib/tema';
 import { cn } from '@/lib/utils';
-import { MODULOS } from '@/lib/modulos';
-
-const GRUPOS = [
-  {
-    titulo: 'Apuração',
-    itens: [
-      { to: '/difal', label: 'Notas do período', icon: LayoutList, chave: 'apuracao', end: true },
-      { to: '/difal/lote', label: 'Emissão em lote', icon: Layers, chave: 'emissao_lote' },
-      { to: '/difal/consulta', label: 'Consultar nota', icon: Search, chave: 'consulta' },
-    ],
-  },
-  {
-    titulo: 'Relatórios',
-    itens: [
-      { to: '/difal/consolidado', label: 'Consolidado', icon: BarChart3, chave: 'consolidado' },
-      { to: '/difal/relatorio', label: 'Relatório de notas', icon: FileSpreadsheet, chave: 'relatorio_notas' },
-    ],
-  },
-  {
-    titulo: 'Entrada de notas',
-    itens: [
-      { to: '/difal/importar', label: 'Importar XML', icon: UploadCloud, chave: 'importar_xml' },
-      { to: '/difal/notas/nova', label: 'Cadastrar nota', icon: FilePlus2, chave: 'cadastrar_nota' },
-    ],
-  },
-  {
-    titulo: 'Cadastros',
-    itens: [
-      { to: '/difal/cnpjs', label: 'CNPJs emissores', icon: Building2, chave: 'cnpjs' },
-      { to: '/difal/aliquotas', label: 'Alíquotas', icon: Percent, chave: 'aliquotas' },
-    ],
-  },
-];
+import { MODULOS, moduloDaRota } from '@/lib/modulos';
 
 const Marca = ({ compacta = false }) => (
   <Link to="/" className="block px-2" aria-label="Controlar.io: voltar à escolha de módulos" title="Voltar à escolha de módulos">
@@ -76,7 +29,8 @@ const Marca = ({ compacta = false }) => (
 
 // Identifica o módulo aberto e leva de volta à escolha de módulos.
 const ModuloAtual = () => {
-  const modulo = MODULOS[0];
+  const { pathname } = useLocation();
+  const modulo = moduloDaRota(pathname) || MODULOS[0];
   const Icone = modulo.icone;
   return (
     <div className="mx-3 mt-5 flex items-center gap-3 rounded-lg bg-sidebar-muted/60 px-3 py-2.5">
@@ -85,7 +39,7 @@ const ModuloAtual = () => {
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/70">Módulo {modulo.numero}</p>
-        <p className="truncate text-sm font-semibold text-white">{modulo.nome}</p>
+        <p className="text-sm font-semibold leading-tight text-white">{modulo.nome}</p>
       </div>
       <Link
         to="/"
@@ -101,6 +55,8 @@ const ModuloAtual = () => {
 
 function Navegacao({ onNavegar }) {
   const { temAcesso } = useAcesso();
+  const { pathname } = useLocation();
+  const GRUPOS = (moduloDaRota(pathname) || MODULOS[0]).menu;
 
   return (
     <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-6" aria-label="Menu principal">

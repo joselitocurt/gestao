@@ -10,6 +10,14 @@ export const PAGINAS = [
   { chave: 'consulta', rota: '/difal/consulta', label: 'Consultar nota', modulo: 'difal' },
   { chave: 'consolidado', rota: '/difal/consolidado', label: 'Consolidado', modulo: 'difal' },
   { chave: 'relatorio_notas', rota: '/difal/relatorio', label: 'Relatório de notas', modulo: 'difal' },
+  // Módulo II: Gestão Disciplinar
+  { chave: 'disc_painel', rota: '/disciplinar', label: 'Painel', modulo: 'disciplinar' },
+  { chave: 'disc_registro', rota: '/disciplinar/registrar', label: 'Registrar punição', modulo: 'disciplinar' },
+  { chave: 'disc_consulta', rota: '/disciplinar/consulta', label: 'Consultar colaborador', modulo: 'disciplinar' },
+  { chave: 'disc_colaboradores', rota: '/disciplinar/colaboradores', label: 'Colaboradores', modulo: 'disciplinar' },
+  { chave: 'disc_motivos', rota: '/disciplinar/motivos', label: 'Motivos', modulo: 'disciplinar' },
+  { chave: 'disc_empresa', rota: '/disciplinar/empresa', label: 'Empresa', modulo: 'disciplinar' },
+  { chave: 'disc_exportacoes', rota: '/disciplinar/exportacoes', label: 'Exportações', modulo: 'disciplinar' },
   // Administração do sistema (fora dos módulos), aberta pela página inicial.
   { chave: 'usuarios', rota: '/usuarios', label: 'Usuários', modulo: null },
 ];

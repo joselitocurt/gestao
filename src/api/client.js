@@ -97,6 +97,10 @@ export const api = {
     NotaFiscal: entidade('NotaFiscal'),
     Emitente: entidade('Emitente'),
     Aliquota: entidade('Aliquota'),
+    Colaborador: entidade('Colaborador'),
+    Motivo: entidade('Motivo'),
+    Punicao: entidade('Punicao'),
+    Empresa: entidade('Empresa'),
     UsuarioSistema: entidade('UsuarioSistema'),
   },
 

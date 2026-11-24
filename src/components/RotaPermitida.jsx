@@ -1,10 +1,15 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAcesso } from '@/lib/AcessoContext';
+import { PAGINAS } from '@/lib/permissoes';
 import TelaAcessoNegado from '@/components/acesso/TelaAcessoNegado';
 
-export default function RotaPermitida({ chave, children, redirecionar = false }) {
-  const { carregando, registro, ativo, temAcesso, primeiraRota } = useAcesso();
+export default function RotaPermitida({ chave, children, redirecionar = false, modulo = null }) {
+  const { carregando, registro, ativo, temAcesso, primeiraRota: primeiraGeral } = useAcesso();
+  // Sem acesso à página inicial do módulo: abre a primeira página liberada do mesmo módulo.
+  const primeiraRota = modulo
+    ? PAGINAS.find((p) => p.modulo === modulo && temAcesso(p.chave))?.rota || null
+    : primeiraGeral;
 
   if (carregando) {
     return (

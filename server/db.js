@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import initSqlJs from 'sql.js';
 import { DB_PATH } from './config.js';
 import { ALIQUOTAS_PADRAO } from '../shared/difal.js';
+import { MOTIVOS_PADRAO } from '../shared/disciplinar.js';
 
 const ESQUEMA = `
   CREATE TABLE IF NOT EXISTS users (
@@ -86,6 +87,63 @@ const ESQUEMA = `
     regiao TEXT,
     interna REAL NOT NULL,
     fcp REAL NOT NULL DEFAULT 0,
+    created_by TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS colaborador (
+    id TEXT PRIMARY KEY,
+    matricula TEXT NOT NULL,
+    nome TEXT NOT NULL,
+    cpf TEXT,
+    funcao TEXT,
+    departamento TEXT,
+    admissao TEXT,
+    status TEXT DEFAULT 'Ativo' CHECK (status IN ('Ativo', 'Afastado', 'Demitido')),
+    created_by TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_colaborador_matricula ON colaborador (matricula);
+
+  CREATE TABLE IF NOT EXISTS motivo (
+    id TEXT PRIMARY KEY,
+    nome TEXT NOT NULL,
+    descricao TEXT,
+    ativo INTEGER DEFAULT 1,
+    created_by TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS punicao (
+    id TEXT PRIMARY KEY,
+    referencia TEXT NOT NULL,
+    colaborador_id TEXT NOT NULL,
+    motivo_id TEXT NOT NULL,
+    nivel INTEGER NOT NULL CHECK (nivel BETWEEN 1 AND 6),
+    data TEXT NOT NULL,
+    ciclo_inicio TEXT,
+    dias_suspensao INTEGER,
+    descricao TEXT,
+    justificativa_nivel TEXT,
+    aplicada_por TEXT,
+    testemunhas TEXT,
+    anexo_uri TEXT,
+    anexo_nome TEXT,
+    created_by TEXT,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_punicao_colaborador ON punicao (colaborador_id, motivo_id, data);
+
+  CREATE TABLE IF NOT EXISTS empresa (
+    id TEXT PRIMARY KEY,
+    nome TEXT,
+    cnpj TEXT,
+    cidade TEXT,
+    endereco TEXT,
     created_by TEXT,
     created_date TEXT NOT NULL,
     updated_date TEXT NOT NULL
@@ -248,6 +306,7 @@ export async function abrirBanco() {
     banco.exec(`UPDATE usuario_sistema SET permissoes = '["apuracao","emissao_lote","cadastrar_nota","importar_xml","cnpjs","consulta","consolidado"]'
                 WHERE perfil = 'usuario' AND (permissoes IS NULL OR permissoes = '')`);
     migrarCalculoDifal();
+    semearDisciplinar();
     salvar();
   });
   return db;
@@ -263,6 +322,18 @@ const COLUNAS_CALCULO = {
   aliq_interna: 'REAL',
   aliq_fcp: 'REAL',
 };
+// Módulo II: motivos padrão na primeira execução.
+function semearDisciplinar() {
+  const total = banco.exec('SELECT COUNT(*) FROM motivo')[0]?.values?.[0]?.[0] || 0;
+  if (total) return;
+  const data = new Date().toISOString();
+  const inserir = banco.prepare(
+    `INSERT INTO motivo (id, nome, descricao, ativo, created_by, created_date, updated_date) VALUES (?, ?, '', 1, 'sistema', ?, ?)`,
+  );
+  MOTIVOS_PADRAO.forEach((nome, i) => inserir.run([`motivo-${i + 1}`, nome, data, data]));
+  inserir.free();
+}
+
 function migrarCalculoDifal() {
   const existentes = new Set((banco.exec('PRAGMA table_info(nota_fiscal)')[0]?.values || []).map((linha) => linha[1]));
   for (const [coluna, tipo] of Object.entries(COLUNAS_CALCULO)) {

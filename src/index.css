@@ -6,6 +6,13 @@
 
 @layer base {
   :root {
+    /* Módulo II: escala dos níveis disciplinares (Verbal → Demissão) */
+    --nivel-1: #C3CDE2; --nivel-1-texto: #14213D;
+    --nivel-2: #8FA3CB; --nivel-2-texto: #14213D;
+    --nivel-3: #5E79AE; --nivel-3-texto: #FFFFFF;
+    --nivel-4: #3A5689; --nivel-4-texto: #FFFFFF;
+    --nivel-5: #253C66; --nivel-5-texto: #FFFFFF;
+    --nivel-6: #14213D; --nivel-6-texto: #FFFFFF;
     /* Marca Controlar.io: azul-marinho #14213D, dourado #A67708 / #E0B44C, cinzas #5B6472 / #AEB6C8 */
     --background: 220 27% 97%;
     --foreground: 221 51% 16%;
@@ -51,6 +58,13 @@
   }
 
   .dark {
+    /* No escuro a escala se inverte: o nível mais grave é o mais claro */
+    --nivel-1: #34466E; --nivel-1-texto: #E6EBF5;
+    --nivel-2: #4A62A0; --nivel-2-texto: #FFFFFF;
+    --nivel-3: #6683C4; --nivel-3-texto: #FFFFFF;
+    --nivel-4: #8AA3D8; --nivel-4-texto: #14213D;
+    --nivel-5: #B2C3E8; --nivel-5-texto: #14213D;
+    --nivel-6: #E0B44C; --nivel-6-texto: #14213D;
     --background: 222 45% 8%;
     --foreground: 220 25% 94%;
     --card: 222 40% 11%;

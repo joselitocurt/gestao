@@ -28,6 +28,10 @@ const negar = (mensagem = 'Sem permissão para esta operação') => {
 const ESCRITA = {
   NotaFiscal: ['apuracao', 'cadastrar_nota', 'importar_xml', 'emissao_lote'],
   Aliquota: ['aliquotas'],
+  Colaborador: ['disc_colaboradores', 'disc_registro', 'disc_consulta', 'disc_exportacoes'],
+  Motivo: ['disc_motivos', 'disc_exportacoes'],
+  Punicao: ['disc_registro', 'disc_consulta', 'disc_exportacoes'],
+  Empresa: ['disc_empresa'],
   Emitente: ['cnpjs', 'importar_xml'],
 };
 
@@ -78,8 +82,19 @@ const lerJson = (texto, padrao) => {
 
 const combinar = (filtro, restricao) => (restricao ? { $and: [filtro || {}, restricao] } : filtro || {});
 
+// Referência da punição é única (ex.: AD-2026-001).
+const referenciaEmUso = (referencia, id = null) =>
+  Boolean(
+    db
+      .prepare('SELECT 1 AS x FROM punicao WHERE lower(referencia) = lower(?) AND id <> ? LIMIT 1')
+      .get(String(referencia || '').trim(), id || ''),
+  );
+
 const inserir = (def, dados, req) => {
   const data = agora();
+  if (def.tabela === 'punicao' && referenciaEmUso(dados.referencia)) {
+    throw new ErroValidacao(`A referência ${dados.referencia} já foi usada.`);
+  }
   if (def.tabela === 'nota_fiscal') dados = { ...dados, ...camposCalculados(dados) };
   const registro = { id: crypto.randomUUID(), ...dados, created_by: req.user.email, created_date: data, updated_date: data };
   const colunas = Object.keys(registro);
@@ -192,6 +207,10 @@ const atualizar = (def, entidade, id, corpo) => {
     Object.assign(dados, camposCalculados({ ...existente, ...dados }));
   }
 
+  if (entidade === 'Punicao' && 'referencia' in dados && referenciaEmUso(dados.referencia, id)) {
+    throw new ErroValidacao(`A referência ${dados.referencia} já foi usada.`);
+  }
+
   const colunas = Object.keys(dados);
   if (colunas.length) {
     db.prepare(
@@ -237,9 +256,19 @@ rotasEntidades.put('/:entidade/:id', (req, res) => {
   res.json(registro);
 });
 
+// Módulo II: o histórico disciplinar não pode perder a referência do colaborador ou do motivo.
+const EM_USO = {
+  Colaborador: ['colaborador_id', 'Este colaborador tem punições registradas: altere a situação para Afastado ou Demitido.'],
+  Motivo: ['motivo_id', 'Este motivo já foi usado em punições: apenas inative.'],
+};
+
 rotasEntidades.delete('/:entidade/:id', (req, res) => {
   const def = obterDef(req.params.entidade);
   verificarAcesso(req, req.params.entidade, 'escrita');
+  const uso = EM_USO[req.params.entidade];
+  if (uso && db.prepare(`SELECT 1 AS x FROM punicao WHERE ${uso[0]} = ? LIMIT 1`).get(req.params.id)) {
+    return res.status(409).json({ message: uso[1] });
+  }
   const resultado = db.prepare(`DELETE FROM ${def.tabela} WHERE id = ?`).run(req.params.id);
   if (!resultado.changes) return res.status(404).json({ message: 'Registro não encontrado' });
   res.json({ ok: true });

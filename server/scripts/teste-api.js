@@ -211,6 +211,32 @@ try {
   });
   conferir(mesmaUf.dados?.difal_calculado === 0, 'operação na mesma UF não gera DIFAL');
 
+  // ------------------------------------------------ Módulo II: Gestão Disciplinar
+  const motivosPadrao = await pedir('/entities/Motivo?limit=100', { token });
+  conferir(motivosPadrao.dados?.items?.length === 7, 'motivos padrão do Módulo II cadastrados');
+  const colab = await pedir('/entities/Colaborador', { metodo: 'POST', token, corpo: { matricula: '100', nome: 'João Teste' } });
+  const pun = {
+    referencia: 'AD-2026-001',
+    colaborador_id: colab.dados?.id,
+    motivo_id: motivosPadrao.dados.items[0].id,
+    nivel: 1,
+    data: '2026-03-10',
+    descricao: 'Atraso de 30 minutos',
+    aplicada_por: 'Gestor',
+  };
+  const p1 = await pedir('/entities/Punicao', { metodo: 'POST', token, corpo: pun });
+  const repetida = await pedir('/entities/Punicao', { metodo: 'POST', token, corpo: pun });
+  conferir(colab.status === 201 && p1.status === 201 && repetida.status === 400, 'punição registrada e referência repetida recusada');
+  const excluirColab = await pedir(`/entities/Colaborador/${colab.dados.id}`, { metodo: 'DELETE', token });
+  const excluirMotivo = await pedir(`/entities/Motivo/${pun.motivo_id}`, { metodo: 'DELETE', token });
+  conferir(excluirColab.status === 409 && excluirMotivo.status === 409, 'colaborador e motivo com punições não podem ser excluídos');
+  const punSemPermissao = await pedir('/entities/Punicao', {
+    metodo: 'POST',
+    token: tokenUsuario,
+    corpo: { ...pun, referencia: 'AD-2026-002' },
+  });
+  conferir(punSemPermissao.status === 403, 'sem a página Registrar punição, o usuário não grava punições');
+
   const semAdmin = await pedir('/entities/UsuarioSistema', { metodo: 'POST', corpo: { nome: 'x', email: 'x@x.com', perfil: 'master' } });
   conferir(semAdmin.status === 401, 'gestão de usuários exige login');
 } catch (erro) {

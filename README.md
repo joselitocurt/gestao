@@ -26,7 +26,19 @@ Endereços antigos (como `/consolidado`) redirecionam para o novo (`/difal/conso
 | **Relatório de notas** (`/difal/relatorio`) | Com os mesmos filtros da Emissão em lote, marca uma ou várias notas (ou todas as do filtro, até 2.000) e exporta em **PDF** ou **Excel (.xlsx)** com emissor, destinatário, CPF, UF, datas, valores, status e a **chave de acesso** (44 dígitos em sequência, gravada como texto no Excel). A planilha tem cabeçalho fixo, filtros e linha de totais. |
 | **Consolidado** (`/difal/consolidado`) | Painel com o total geral e filtros por CNPJ, ano, mês e UF de destino. Tem evolução mensal, rankings por UF e por CNPJ, gráfico UF × CNPJ e exportação em PDF e CSV (Excel). |
 
-### Administração (`/usuarios`, só Master)
+### Módulo II: Gestão Disciplinar (`/disciplinar`)
+
+Controle de punições com progressão por motivo. Cada colaborador tem um fluxo por motivo: o ciclo começa na primeira punição e dura 12 meses; dentro dele, o próximo nível é sugerido (Verbal → Escrita 1 → Escrita 2 → Escrita 3 → Suspensão → Demissão). Fora da sequência, é preciso justificar. Regras em `shared/disciplinar.js`.
+
+| Tela | O que faz |
+|---|---|
+| **Painel** (`/disciplinar`) | Punições do período, colaboradores em acompanhamento, suspensões e demissões; gráfico mensal pelos motivos mais recorrentes, distribuição por nível, registros recentes e colaboradores em atenção (Escrita 3 ou acima). Filtros por ano, mês e departamento. |
+| **Registrar punição** (`/disciplinar/registrar`) | Busca do colaborador (ou cadastro rápido), motivo, data, nível sugerido, referência automática (AD-AAAA-NNN), descrição, testemunhas e PDF assinado. Demissão muda a situação do colaborador. Gera o formulário para assinatura em duas vias. |
+| **Consultar colaborador** (`/disciplinar/consulta`) | Histórico por motivo e ciclo, fluxos atuais, PDFs anexados, edição e exclusão das punições, formulário de cada punição e histórico completo em PDF. |
+| **Exportações** (`/disciplinar/exportacoes`) | Punições do mês em Excel ou CSV; backup completo em JSON e restauração (aceita também o backup da versão anterior do sistema disciplinar). |
+| **Colaboradores**, **Motivos**, **Empresa** | Cadastros. Colaborador e motivo com punições não podem ser excluídos (inative ou mude a situação). Os dados da empresa saem no cabeçalho dos formulários. |
+
+
 
 - **Master:** acesso total a todos os módulos e páginas, inclusive Usuários.
 - **Usuário:** acessa apenas as páginas marcadas no seu cadastro, escolhidas uma a uma e agrupadas por módulo (não há permissões padrão). Pode alterar dados nas páginas liberadas.
