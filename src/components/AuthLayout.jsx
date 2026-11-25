@@ -1,4 +1,5 @@
 import React from 'react';
+import Creditos from '@/components/Creditos';
 
 // Tela de acesso: logomarca e formulário, sem textos de apresentação.
 export default function AuthLayout({ icon: Icon, title, subtitle, footer, children }) {
@@ -15,7 +16,7 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
         />
       </aside>
 
-      <main className="flex items-center justify-center px-4 py-12 sm:px-8">
+      <main className="relative flex items-center justify-center px-4 pb-16 pt-12 sm:px-8">
         <div className="w-full max-w-sm">
           {/* Celular: a logomarca fica acima do formulário */}
           <img
@@ -44,6 +45,9 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
           {children}
           {footer && <p className="mt-8 text-sm text-muted-foreground">{footer}</p>}
         </div>
+        <footer className="absolute inset-x-0 bottom-5">
+          <Creditos />
+        </footer>
       </main>
     </div>
   );
