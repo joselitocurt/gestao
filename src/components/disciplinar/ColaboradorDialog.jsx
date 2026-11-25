@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useDisciplinar } from '@/lib/disciplinar/DadosContext';
-import { SITUACOES, cpfValido, mascaraCpf, normalizar, somenteDigitos } from '@shared/disciplinar.js';
+import { SITUACOES, mascaraCpf, normalizar, situacaoCpf, somenteDigitos } from '@shared/disciplinar.js';
 
 const VAZIO = { matricula: '', nome: '', cpf: '', funcao: '', departamento: '', admissao: '', status: 'Ativo' };
 
@@ -43,7 +43,7 @@ export default function ColaboradorDialog({ aberto, colaborador, onFechar, onSal
     if (!v.nome) erros.push('Informe o nome.');
     if (v.matricula && colaboradores.some((x) => x.id !== colaborador?.id && normalizar(x.matricula) === normalizar(v.matricula)))
       erros.push('Já existe colaborador com essa matrícula.');
-    if (v.cpf && !cpfValido(v.cpf)) erros.push('CPF inválido.');
+    if (situacaoCpf(v.cpf) === 'formato') erros.push('O CPF precisa ter 11 dígitos.');
     if (v.cpf && colaboradores.some((x) => x.id !== colaborador?.id && somenteDigitos(x.cpf) && somenteDigitos(x.cpf) === somenteDigitos(v.cpf)))
       erros.push('Já existe colaborador com esse CPF.');
     if (erros.length) return setErro(erros.join(' '));
@@ -74,6 +74,11 @@ export default function ColaboradorDialog({ aberto, colaborador, onFechar, onSal
           <div className="space-y-1.5">
             <Label htmlFor="c-cpf">CPF</Label>
             <Input id="c-cpf" inputMode="numeric" placeholder="000.000.000-00" value={f.cpf} onChange={campo('cpf')} />
+            {situacaoCpf(f.cpf) === 'digito' ? (
+              <p className="text-xs leading-snug text-status-pendente">
+                O dígito verificador não confere. Confira o número; o cadastro pode ser salvo assim mesmo.
+              </p>
+            ) : null}
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="c-nome">Nome completo *</Label>

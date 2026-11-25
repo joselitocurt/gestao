@@ -180,6 +180,13 @@ export default function ImportarColaboradoresDialog({ aberto, onFechar, onConclu
                               {l.erros.join(' · ')}
                             </td>
                           </tr>
+                        ) : l.avisos?.length ? (
+                          <tr>
+                            <td />
+                            <td colSpan={8} className="px-3 pb-2 text-status-pendente">
+                              Aviso: {l.avisos.join(' · ')} (será importado)
+                            </td>
+                          </tr>
                         ) : null}
                       </React.Fragment>
                     );

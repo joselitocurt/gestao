@@ -1,4 +1,4 @@
-import { SITUACOES, cpfValido, mascaraCpf, normalizar, somenteDigitos } from '@shared/disciplinar.js';
+import { SITUACOES, mascaraCpf, normalizar, normalizarCpf, situacaoCpf, somenteDigitos } from '@shared/disciplinar.js';
 import { baixarBlob } from '@/lib/disciplinar/arquivos';
 
 // Importação de colaboradores em lote: modelo .xlsx, leitura (.xlsx ou .csv) e validação.
@@ -203,9 +203,12 @@ export function validarLinhas(linhas, colaboradores) {
     if (!matricula) erros.push('matrícula vazia');
     if (!nome) erros.push('nome vazio');
     if (matricula && vistosMat.has(normalizar(matricula))) erros.push(`matrícula repetida na linha ${vistosMat.get(normalizar(matricula))}`);
-    if (cpfTexto && !cpfValido(cpfTexto)) erros.push('CPF inválido');
-    const cpf = cpfTexto ? somenteDigitos(cpfTexto) : '';
-    if (cpf && cpfValido(cpfTexto)) {
+    const avisos = [];
+    const situacao = situacaoCpf(cpfTexto);
+    if (situacao === 'formato') erros.push('CPF precisa ter 11 dígitos');
+    if (situacao === 'digito') avisos.push('dígito verificador do CPF não confere: confira o número');
+    const cpf = situacao === 'ok' || situacao === 'digito' ? normalizarCpf(cpfTexto) : '';
+    if (cpf) {
       if (vistosCpf.has(cpf)) erros.push(`CPF repetido na linha ${vistosCpf.get(cpf)}`);
       const outro = colaboradores.find((c) => somenteDigitos(c.cpf) === cpf && c.id !== existente?.id);
       if (outro) erros.push(`CPF já cadastrado para ${outro.nome} (mat. ${outro.matricula})`);
@@ -218,12 +221,12 @@ export function validarLinhas(linhas, colaboradores) {
     const dados = {
       matricula,
       nome,
-      cpf: cpf && cpfValido(cpfTexto) ? mascaraCpf(cpf) : '',
+      cpf: cpf ? mascaraCpf(cpf) : '',
       funcao: String(l.funcao || '').trim(),
       departamento: String(l.departamento || '').trim(),
       admissao: admissao || null,
       status: status || 'Ativo',
     };
-    return { numero: l.numero, dados, existente, erros, acao: erros.length ? 'erro' : existente ? 'atualizar' : 'novo' };
+    return { numero: l.numero, dados, existente, erros, avisos, acao: erros.length ? 'erro' : existente ? 'atualizar' : 'novo' };
   });
 }

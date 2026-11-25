@@ -115,6 +115,23 @@ export function cpfValido(v) {
   return d2 === Number(c[10]);
 }
 
+/**
+ * CPF só com dígitos. Planilhas do Excel guardam o CPF como número e perdem os zeros
+ * à esquerda (043.901.846-36 vira 4390184636): com 9 ou 10 dígitos, os zeros são repostos.
+ */
+export function normalizarCpf(v) {
+  const d = somenteDigitos(v);
+  return d.length >= 9 && d.length < 11 ? d.padStart(11, '0') : d;
+}
+
+/** Situação do CPF: 'vazio', 'formato' (não tem 11 dígitos), 'digito' (dígito verificador não confere) ou 'ok'. */
+export function situacaoCpf(v) {
+  const d = normalizarCpf(v);
+  if (!d) return 'vazio';
+  if (d.length !== 11) return 'formato';
+  return cpfValido(d) ? 'ok' : 'digito';
+}
+
 export function mascaraCpf(v) {
   const d = somenteDigitos(v).slice(0, 11);
   return d
