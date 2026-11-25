@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { FileSpreadsheet, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { api } from '@/api/client';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/components/ui/use-toast';
 import ColaboradorDialog from '@/components/disciplinar/ColaboradorDialog';
+import ImportarColaboradoresDialog from '@/components/disciplinar/ImportarColaboradoresDialog';
 import { Carregando, SituacaoPill, Vazio } from '@/components/disciplinar/Niveis';
 import { useAcesso } from '@/lib/AcessoContext';
 import { useDisciplinar } from '@/lib/disciplinar/DadosContext';
@@ -30,6 +31,7 @@ export default function Colaboradores() {
   const [busca, setBusca] = useState('');
   const [dialogo, setDialogo] = useState(null); // { colaborador }
   const [excluir, setExcluir] = useState(null);
+  const [importar, setImportar] = useState(false);
 
   if (d.carregando) return <Carregando />;
   const lista = d.buscarColaboradores(busca);
@@ -51,9 +53,14 @@ export default function Colaboradores() {
         titulo="Colaboradores"
         descricao="Cadastro do quadro de funcionários."
         acoes={
-          <Button onClick={() => setDialogo({ colaborador: null })} disabled={!podeEditar}>
-            <Plus className="h-4 w-4" /> Novo colaborador
-          </Button>
+          <>
+            <Button variant="outline" onClick={() => setImportar(true)} disabled={!podeEditar}>
+              <FileSpreadsheet className="h-4 w-4" /> Importar planilha
+            </Button>
+            <Button onClick={() => setDialogo({ colaborador: null })} disabled={!podeEditar}>
+              <Plus className="h-4 w-4" /> Novo colaborador
+            </Button>
+          </>
         }
       />
       <div className="relative mt-6 max-w-xl">
@@ -129,6 +136,18 @@ export default function Colaboradores() {
         onSalvo={() => {
           toast({ title: dialogo?.colaborador ? 'Colaborador atualizado' : 'Colaborador cadastrado' });
           setDialogo(null);
+        }}
+      />
+
+      <ImportarColaboradoresDialog
+        aberto={importar}
+        onFechar={() => setImportar(false)}
+        onConcluido={({ novos, atualizados, ignorados }) => {
+          setImportar(false);
+          toast({
+            title: 'Importação concluída',
+            description: `${novos} cadastrado(s), ${atualizados} atualizado(s)${ignorados ? `, ${ignorados} linha(s) com erro ignorada(s)` : ''}.`,
+          });
         }}
       />
 

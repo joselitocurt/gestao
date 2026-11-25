@@ -36,7 +36,7 @@ Controle de punições com progressão por motivo. Cada colaborador tem um fluxo
 | **Registrar punição** (`/disciplinar/registrar`) | Busca do colaborador (ou cadastro rápido), motivo, data, nível sugerido, referência automática (AD-AAAA-NNN), descrição, testemunhas e PDF assinado. Demissão muda a situação do colaborador. Gera o formulário para assinatura em duas vias. |
 | **Consultar colaborador** (`/disciplinar/consulta`) | Histórico por motivo e ciclo, fluxos atuais, PDFs anexados, edição e exclusão das punições, formulário de cada punição e histórico completo em PDF. |
 | **Exportações** (`/disciplinar/exportacoes`) | Punições do mês em Excel ou CSV; backup completo em JSON e restauração (aceita também o backup da versão anterior do sistema disciplinar). |
-| **Colaboradores**, **Motivos**, **Empresa** | Cadastros. Colaborador e motivo com punições não podem ser excluídos (inative ou mude a situação). Os dados da empresa saem no cabeçalho dos formulários. |
+| **Colaboradores**, **Motivos**, **Empresa** | Cadastros. Colaboradores podem ser importados em lote por planilha (.xlsx ou .csv), com arquivo modelo para download, prévia validada linha a linha e atualização das matrículas que já existem (campo em branco não apaga o cadastro). Colaborador e motivo com punições não podem ser excluídos (inative ou mude a situação). Os dados da empresa saem no cabeçalho dos formulários. |
 
 
 
