@@ -126,7 +126,7 @@ export default function Painel() {
           largura="w-44"
         />
         <Filtro
-          rotulo="Departamento"
+          rotulo="Lotação"
           valor={dep}
           onChange={setDep}
           opcoes={[{ valor: 'todos', rotulo: 'Todos' }, ...calc.deps.map((x) => ({ valor: x, rotulo: x }))]}

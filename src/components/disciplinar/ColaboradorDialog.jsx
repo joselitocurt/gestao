@@ -84,7 +84,7 @@ export default function ColaboradorDialog({ aberto, colaborador, onFechar, onSal
             <Input id="c-fun" value={f.funcao} onChange={campo('funcao')} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="c-dep">Departamento</Label>
+            <Label htmlFor="c-dep">Lotação</Label>
             <Input id="c-dep" list="c-deps" value={f.departamento} onChange={campo('departamento')} />
             <datalist id="c-deps">
               {departamentos.map((d) => (

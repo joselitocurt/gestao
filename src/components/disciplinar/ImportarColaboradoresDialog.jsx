@@ -113,7 +113,7 @@ export default function ImportarColaboradoresDialog({ aberto, onFechar, onConclu
           <div className="rounded-xl border border-border p-4">
             <p className="text-sm font-semibold">1. Baixe o modelo</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Colunas: Matrícula*, Nome completo*, CPF, Função, Departamento, Admissão e Situação. Inclui uma aba de instruções.
+              Colunas: Matrícula*, Nome completo*, CPF, Função, Lotação, Admissão e Situação. Inclui uma aba de instruções.
             </p>
             <Button variant="outline" size="sm" className="mt-3" onClick={modelo} disabled={baixando}>
               {baixando ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
@@ -145,7 +145,7 @@ export default function ImportarColaboradoresDialog({ aberto, onFechar, onConclu
               <table className="w-full text-xs">
                 <thead className="sticky top-0 bg-muted">
                   <tr className="text-left text-muted-foreground">
-                    {['Linha', 'Resultado', 'Matrícula', 'Nome', 'CPF', 'Função', 'Depto.', 'Admissão', 'Situação'].map((t) => (
+                    {['Linha', 'Resultado', 'Matrícula', 'Nome', 'CPF', 'Função', 'Lotação', 'Admissão', 'Situação'].map((t) => (
                       <th key={t} className="whitespace-nowrap px-3 py-2 font-semibold">
                         {t}
                       </th>

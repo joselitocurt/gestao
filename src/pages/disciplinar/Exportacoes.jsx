@@ -48,7 +48,7 @@ export default function Exportacoes() {
         Colaborador: c.nome || '',
         CPF: c.cpf || '',
         Função: c.funcao || '',
-        Departamento: c.departamento || '',
+        Lotação: c.departamento || '',
         Motivo: d.nomeMotivo(p.motivo_id),
         Nível: NIVEIS[Number(p.nivel)]?.nome || '',
         'Dias de suspensão': p.dias_suspensao || '',

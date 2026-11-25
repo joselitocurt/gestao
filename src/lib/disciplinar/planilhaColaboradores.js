@@ -8,7 +8,7 @@ export const COLUNAS = [
   { chave: 'nome', titulo: 'Nome completo *', largura: 36, exemplo: 'Maria da Silva Santos', ajuda: 'Obrigatório.' },
   { chave: 'cpf', titulo: 'CPF', largura: 17, exemplo: '529.982.247-25', ajuda: 'Opcional. Com ou sem pontos; precisa ser um CPF válido e único.' },
   { chave: 'funcao', titulo: 'Função', largura: 26, exemplo: 'Auxiliar administrativo', ajuda: 'Opcional.' },
-  { chave: 'departamento', titulo: 'Departamento', largura: 22, exemplo: 'Administrativo', ajuda: 'Opcional.' },
+  { chave: 'departamento', titulo: 'Lotação', largura: 22, exemplo: 'Administrativo', ajuda: 'Opcional.' },
   { chave: 'admissao', titulo: 'Admissão', largura: 14, exemplo: '15/03/2024', ajuda: 'Opcional. Data no formato dd/mm/aaaa.' },
   { chave: 'status', titulo: 'Situação', largura: 14, exemplo: 'Ativo', ajuda: 'Ativo, Afastado ou Demitido. Em branco = Ativo.' },
 ];
@@ -19,7 +19,7 @@ const APELIDOS = {
   nome: ['nome', 'nome completo', 'nome completo *', 'colaborador', 'funcionario'],
   cpf: ['cpf'],
   funcao: ['funcao', 'cargo'],
-  departamento: ['departamento', 'depto', 'setor'],
+  departamento: ['lotacao', 'departamento', 'depto', 'setor'],
   admissao: ['admissao', 'data de admissao', 'data admissao'],
   status: ['situacao', 'status'],
 };

@@ -145,7 +145,7 @@ export default function Consulta() {
                 </span>
                 {c.cpf ? <span className="numeros">CPF: {c.cpf}</span> : null}
                 {c.funcao ? <span>Função: {c.funcao}</span> : null}
-                {c.departamento ? <span>Depto.: {c.departamento}</span> : null}
+                {c.departamento ? <span>Lotação: {c.departamento}</span> : null}
                 {c.admissao ? <span>Admissão: {fmt(c.admissao)}</span> : null}
               </p>
             </div>

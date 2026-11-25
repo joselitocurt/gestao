@@ -64,7 +64,7 @@ export async function pdfHistorico({ colaborador: c, punicoes, nomeMotivo, fluxo
       ['Matrícula', c.matricula || ''],
       ['CPF', c.cpf || '-'],
       ['Função', c.funcao || '-'],
-      ['Departamento', c.departamento || '-'],
+      ['Lotação', c.departamento || '-'],
       ['Admissão', fmt(c.admissao) || '-'],
       ['Situação', c.status || 'Ativo'],
     ],
@@ -247,7 +247,7 @@ export async function pdfFormulario({ punicao: p, colaborador, empresa, punicoes
     tabela('Dados do colaborador', [
       ['Nome', c.nome || '', 'Matrícula', c.matricula || ''],
       ['CPF', c.cpf || '-', 'Função', c.funcao || '-'],
-      ['Departamento', c.departamento || '-', 'Admissão', fmt(c.admissao) || '-'],
+      ['Lotação', c.departamento || '-', 'Admissão', fmt(c.admissao) || '-'],
     ]);
     tabela('Dados da ocorrência', [
       ['Motivo', motivo, 'Data da ocorrência', dataOc],

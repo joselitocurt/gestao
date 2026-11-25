@@ -32,7 +32,7 @@ Controle de punições com progressão por motivo. Cada colaborador tem um fluxo
 
 | Tela | O que faz |
 |---|---|
-| **Painel** (`/disciplinar`) | Punições do período, colaboradores em acompanhamento, suspensões e demissões; gráfico mensal pelos motivos mais recorrentes, distribuição por nível, registros recentes e colaboradores em atenção (Escrita 3 ou acima). Filtros por ano, mês e departamento. |
+| **Painel** (`/disciplinar`) | Punições do período, colaboradores em acompanhamento, suspensões e demissões; gráfico mensal pelos motivos mais recorrentes, distribuição por nível, registros recentes e colaboradores em atenção (Escrita 3 ou acima). Filtros por ano, mês e lotação. |
 | **Registrar punição** (`/disciplinar/registrar`) | Busca do colaborador (ou cadastro rápido), motivo, data, nível sugerido, referência automática (AD-AAAA-NNN), descrição, testemunhas e PDF assinado. Demissão muda a situação do colaborador. Gera o formulário para assinatura em duas vias. |
 | **Consultar colaborador** (`/disciplinar/consulta`) | Histórico por motivo e ciclo, fluxos atuais, PDFs anexados, edição e exclusão das punições, formulário de cada punição e histórico completo em PDF. |
 | **Exportações** (`/disciplinar/exportacoes`) | Punições do mês em Excel ou CSV; backup completo em JSON e restauração (aceita também o backup da versão anterior do sistema disciplinar). |

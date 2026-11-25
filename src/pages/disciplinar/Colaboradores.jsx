@@ -81,7 +81,7 @@ export default function Colaboradores() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50 text-left text-xs text-muted-foreground">
-                  {['Matrícula', 'Nome', 'CPF', 'Função', 'Departamento', 'Admissão', 'Situação', ''].map((t) => (
+                  {['Matrícula', 'Nome', 'CPF', 'Função', 'Lotação', 'Admissão', 'Situação', ''].map((t) => (
                     <th key={t} className="whitespace-nowrap px-4 py-2.5 font-semibold">
                       {t}
                     </th>
