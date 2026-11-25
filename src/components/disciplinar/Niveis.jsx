@@ -2,7 +2,7 @@ import React from 'react';
 import { NIVEIS } from '@shared/disciplinar.js';
 import { cn } from '@/lib/utils';
 
-// Escala da marca: do cinza-azulado claro (Verbal) ao azul-marinho Controlar.io (Demissão).
+// Escala gradual de gravidade: do amarelo (Verbal) ao vermelho (Demissão).
 // As cores ficam em src/index.css (--nivel-1 … --nivel-6), com variação para o tema escuro.
 export const COR_NIVEL = [null, 1, 2, 3, 4, 5, 6].map((n) => (n ? `var(--nivel-${n})` : null));
 const TEXTO_NIVEL = [null, 1, 2, 3, 4, 5, 6].map((n) => (n ? `var(--nivel-${n}-texto)` : null));
