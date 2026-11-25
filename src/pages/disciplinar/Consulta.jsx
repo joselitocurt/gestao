@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Download, ExternalLink, FileDown, Loader2, Pencil, Printer, Search, Trash2 } from 'lucide-react';
+import { Download, ExternalLink, FileDown, Loader2, Pencil, Printer, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { api } from '@/api/client';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,12 @@ export default function Consulta() {
     setParams(id ? { c: id } : {});
     setBusca('');
   };
+  // Volta ao início da consulta: sem colaborador selecionado e com a busca limpa.
+  const novaConsulta = () => {
+    escolher('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => document.getElementById('busca-consulta')?.focus(), 0);
+  };
 
   const executar = async (chave, fn, erroTitulo) => {
     setOcupado(chave);
@@ -69,11 +75,22 @@ export default function Consulta() {
 
   return (
     <div>
-      <PageHeader titulo="Consultar colaborador" descricao="Histórico, fluxos por motivo e documentos anexados." />
+      <PageHeader
+        titulo="Consultar colaborador"
+        descricao="Histórico, fluxos por motivo e documentos anexados."
+        acoes={
+          c ? (
+            <Button variant="outline" onClick={novaConsulta}>
+              <RotateCcw className="h-4 w-4" /> Nova consulta
+            </Button>
+          ) : null
+        }
+      />
 
       <div className="relative mx-auto mt-6 max-w-xl">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          id="busca-consulta"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Buscar por nome, matrícula, CPF ou função…"
