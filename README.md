@@ -117,7 +117,7 @@ Em **Websites → Adicionar site → Node.js web app**, conecte este repositóri
 - **Comando de build:** `npm run build`
 - **Arquivo de entrada:** `server.js`
 
-Variáveis de ambiente: `NODE_ENV=production`, `APP_URL`, `DATA_DIR` (pasta fora de `domains/`, por exemplo `/home/u123456789/dados-difal`), `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` e, para os e-mails, `SMTP_HOST=smtp.hostinger.com`, `SMTP_PORT=465`, `SMTP_SECURE=true`, `SMTP_USER`, `SMTP_PASS` e `SMTP_FROM`. Não defina `PORT`, porque a Hostinger informa a porta.
+Variáveis de ambiente: `NODE_ENV=production`, `APP_URL`, `DATA_DIR` (pasta fora de `domains/`, por exemplo `/home/u123456789/dados-difal`), `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` e, para os e-mails, `SMTP_HOST=smtp.hostinger.com`, `SMTP_PORT=465`, `SMTP_SECURE=true`, `SMTP_USER` (e-mail completo da caixa) e `SMTP_PASS`. `SMTP_FROM` é opcional e serve só para o nome do remetente (ex.: `Gestão DIFAL`): o endereço de envio é sempre o de `SMTP_USER`, porque a Hostinger recusa remetente diferente da caixa autenticada. Em Usuários, o botão **Testar envio de e-mail** manda uma mensagem de teste e mostra a configuração em uso. Não defina `PORT`, porque a Hostinger informa a porta.
 
 ### Com Docker
 

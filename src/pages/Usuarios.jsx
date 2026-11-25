@@ -1,6 +1,6 @@
 import PageHeader from '@/components/PageHeader';
 import React, { useEffect, useState } from 'react';
-import { UserPlus } from 'lucide-react';
+import { MailCheck, UserPlus } from 'lucide-react';
 import { api } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
@@ -8,6 +8,7 @@ import { useAcesso } from '@/lib/AcessoContext';
 import ListaUsuarios from '@/components/usuarios/ListaUsuarios';
 import UsuarioFormDialog from '@/components/usuarios/UsuarioFormDialog';
 import LinkAcessoDialog from '@/components/usuarios/LinkAcessoDialog';
+import TesteEmailDialog from '@/components/usuarios/TesteEmailDialog';
 import { PERFIS } from '@/lib/permissoes';
 
 export default function Usuarios() {
@@ -15,6 +16,7 @@ export default function Usuarios() {
   const [carregando, setCarregando] = useState(true);
   const [dialogo, setDialogo] = useState(null);
   const [linkAcesso, setLinkAcesso] = useState(null);
+  const [testeEmail, setTesteEmail] = useState(false);
   const { emailAtual, recarregar } = useAcesso();
   const { toast } = useToast();
 
@@ -83,10 +85,18 @@ export default function Usuarios() {
       <PageHeader
         titulo="Usuários"
         descricao="Quem acessa o sistema, com qual perfil e quais páginas pode abrir."
-        acoes={<Button onClick={() => setDialogo({ usuario: null })}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Novo usuário
-        </Button>}
+        acoes={
+          <>
+            <Button variant="outline" onClick={() => setTesteEmail(true)}>
+              <MailCheck className="mr-2 h-4 w-4" />
+              Testar envio de e-mail
+            </Button>
+            <Button onClick={() => setDialogo({ usuario: null })}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Novo usuário
+            </Button>
+          </>
+        }
       />
 
       <div className="mt-5 grid gap-2 sm:grid-cols-2">
@@ -109,6 +119,7 @@ export default function Usuarios() {
       />
 
       <LinkAcessoDialog dados={linkAcesso} onFechar={() => setLinkAcesso(null)} />
+      <TesteEmailDialog aberto={testeEmail} onFechar={() => setTesteEmail(false)} />
 
       <UsuarioFormDialog
         aberto={Boolean(dialogo)}

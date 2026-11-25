@@ -60,7 +60,7 @@ export default function LinkAcessoDialog({ dados, onFechar }) {
 
         {dados.motivo ? (
           <p className="rounded-lg bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-            Motivo da falha no e-mail: {dados.motivo}. Confira as variáveis SMTP na hospedagem.
+            Motivo da falha no e-mail: {dados.motivo}. Use “Testar envio de e-mail” na página Usuários para conferir a configuração.
           </p>
         ) : null}
 

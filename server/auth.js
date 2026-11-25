@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db, agora } from './db.js';
 import { APP_URL, SECRET } from './config.js';
-import { enviarEmail } from './email.js';
+import { enviarEmail, resumoSmtp } from './email.js';
 
 const UMA_HORA = 60 * 60 * 1000;
 const VALIDADE_CONVITE = 7 * 24 * UMA_HORA;
@@ -189,6 +189,16 @@ rotasUsuarios.post('/invite', autenticar, somenteAdmin, async (req, res, next) =
 });
 
 // Link de nova senha gerado pelo Master na tela de Usuários.
+// Teste do envio de e-mail: manda uma mensagem para o próprio Master e devolve o resultado.
+rotasUsuarios.post('/email-teste', autenticar, somenteAdmin, async (req, res) => {
+  const envio = await enviarEmail({
+    para: req.user.email,
+    assunto: 'Teste de envio de e-mail · Controlar.io',
+    texto: 'Este é um teste do envio de e-mails do sistema. Se você recebeu esta mensagem, os convites e os links de senha também serão entregues.\n',
+  });
+  res.json({ ...envio, para: req.user.email, configuracao: resumoSmtp() });
+});
+
 rotasUsuarios.post('/reset-link', autenticar, somenteAdmin, async (req, res, next) => {
   try {
     const usuario = buscarUsuarioPorEmail(req.body?.email);
